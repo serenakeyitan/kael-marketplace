@@ -93,6 +93,62 @@ export default function MySkillsPage() {
     }
   }, [isCreator]);
 
+  // Refresh data when page gains focus or becomes visible
+  useEffect(() => {
+    const handleFocus = () => {
+      // Refresh installed skills when page regains focus
+      if (activeTab === 'installed') {
+        fetchInstalledSkills();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Refresh when tab becomes visible
+        if (activeTab === 'installed') {
+          fetchInstalledSkills();
+        }
+      }
+    };
+
+    // Listen for storage events to sync between tabs/pages
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'skillsUpdated' && e.newValue === 'true') {
+        // Refresh installed skills when another tab/page updates skills
+        fetchInstalledSkills();
+        // Reset the flag
+        localStorage.setItem('skillsUpdated', 'false');
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also refresh on navigation
+    const handlePopState = () => {
+      if (activeTab === 'installed') {
+        fetchInstalledSkills();
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+
+    // Check for updates when component mounts
+    const skillsUpdated = localStorage.getItem('skillsUpdated');
+    if (skillsUpdated === 'true') {
+      fetchInstalledSkills();
+      localStorage.setItem('skillsUpdated', 'false');
+    }
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [activeTab]);
+
   const fetchInstalledSkills = async () => {
     try {
       const response = await fetch('/api/me/installed');
@@ -226,6 +282,8 @@ export default function MySkillsPage() {
           title: 'Success',
           description: `${skillName} has been uninstalled`,
         });
+        // Signal that skills have been updated for other pages
+        localStorage.setItem('skillsUpdated', 'true');
       }
     } catch (error) {
       toast({

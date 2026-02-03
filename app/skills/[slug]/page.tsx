@@ -335,6 +335,8 @@ export default function SkillDetailPage() {
             title: 'Success',
             description: 'Skill added to your collection',
           });
+          // Signal that skills have been updated
+          localStorage.setItem('skillsUpdated', 'true');
           // Re-check install status to sync
           setTimeout(checkInstallStatus, 100);
         } else {
@@ -370,6 +372,8 @@ export default function SkillDetailPage() {
             title: 'Success',
             description: 'Skill removed from your collection',
           });
+          // Signal that skills have been updated
+          localStorage.setItem('skillsUpdated', 'true');
           // Re-check install status to sync
           setTimeout(checkInstallStatus, 100);
         } else {
