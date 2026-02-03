@@ -92,6 +92,32 @@ export default function Home() {
     fetchSkills();
   }, [fetchSkills]);
 
+  // Listen for skill updates (new skills created, etc.)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'skillsUpdated' && e.newValue === 'true') {
+        fetchSkills();
+        localStorage.setItem('skillsUpdated', 'false');
+      }
+    };
+
+    const handleFocus = () => {
+      // Check if skills were updated when tab gains focus
+      if (localStorage.getItem('skillsUpdated') === 'true') {
+        fetchSkills();
+        localStorage.setItem('skillsUpdated', 'false');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchSkills]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Analytics Chart - Full width section */}

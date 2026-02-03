@@ -31,10 +31,12 @@ export default function SkillCardNew({ skill, onUseSkill, initialLiked = false, 
   const [showRedirectDialog, setShowRedirectDialog] = useState(false);
   const router = useRouter();
 
-  // Sync liked state with prop changes
+  // Initialize liked state from localStorage on mount
   useEffect(() => {
-    setIsLiked(initialLiked);
-  }, [initialLiked]);
+    const likedSkills = JSON.parse(localStorage.getItem('likedSkills') || '[]');
+    const isSkillLiked = likedSkills.includes(skill.id);
+    setIsLiked(isSkillLiked || initialLiked);
+  }, [skill.id, initialLiked]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Only navigate if not clicking on a button or link
@@ -61,6 +63,26 @@ export default function SkillCardNew({ skill, onUseSkill, initialLiked = false, 
     e.stopPropagation();
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
+
+    // Update localStorage for liked skills
+    const likedSkills = JSON.parse(localStorage.getItem('likedSkills') || '[]');
+    if (newLikedState) {
+      // Add to liked skills if not already there
+      if (!likedSkills.includes(skill.id)) {
+        likedSkills.push(skill.id);
+      }
+    } else {
+      // Remove from liked skills
+      const index = likedSkills.indexOf(skill.id);
+      if (index > -1) {
+        likedSkills.splice(index, 1);
+      }
+    }
+    localStorage.setItem('likedSkills', JSON.stringify(likedSkills));
+
+    // Signal that liked skills have been updated
+    localStorage.setItem('skillsUpdated', 'true');
+
     onLikeChange?.(newLikedState);
   };
 

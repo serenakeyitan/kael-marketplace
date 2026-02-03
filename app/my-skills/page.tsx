@@ -171,54 +171,26 @@ export default function MySkillsPage() {
       // Get liked skills from localStorage
       const likedSkillIds = JSON.parse(localStorage.getItem('likedSkills') || '[]');
 
-      // Simulate fetching favorite skills - in production, this would fetch from API
-      // For now, create mock data only for skills that are actually liked
-      const mockFavorites: FavoriteSkillData[] = [];
+      // Fetch all skills from the API to get the full data
+      const response = await fetch('/api/skills');
+      const data = await response.json();
+      const allSkills = data.skills || [];
 
-      // Only add skills if they exist in localStorage liked skills
-      if (likedSkillIds.includes('1') || likedSkillIds.length === 0) { // Show some defaults if empty
-        mockFavorites.push({
-          skillId: '1',
-          likedAt: new Date().toISOString(),
-          skill: {
-            id: '1',
-            slug: 'literature-review',
-            name: 'Literature Review Assistant',
-            shortDescription: 'AI-powered literature review with citation management',
-            longDescription: '',
-            category: 'Academic',
-            audienceTags: [],
-            author: { name: 'Kael Team', isOfficial: true },
-            stats: { installs: 45230, totalConversations: 128500, rating: 4.9 },
-            version: '1.0',
-            lastUpdated: new Date().toISOString(),
-            demoPrompt: '',
-            examples: []
+      // Filter skills that are liked and create favorite entries
+      const mockFavorites: FavoriteSkillData[] = likedSkillIds
+        .map((skillId: string) => {
+          const skill = allSkills.find((s: Skill) => s.id === skillId);
+          if (skill) {
+            return {
+              skillId: skill.id,
+              likedAt: new Date().toISOString(), // In production, store this when liked
+              skill: skill
+            };
           }
-        });
-      }
+          return null;
+        })
+        .filter(Boolean);
 
-      if (likedSkillIds.includes('2')) {
-        mockFavorites.push({
-          skillId: '2',
-          likedAt: new Date().toISOString(),
-          skill: {
-            id: '2',
-            slug: 'code-review',
-            name: 'Code Review Pro',
-            shortDescription: 'Automated code review with best practices',
-            longDescription: '',
-            category: 'Programming',
-            audienceTags: [],
-            author: { name: 'DevTools Inc', isOfficial: false },
-            stats: { installs: 32100, totalConversations: 98000, rating: 4.7 },
-            version: '1.0',
-            lastUpdated: new Date().toISOString(),
-            demoPrompt: '',
-            examples: []
-          }
-        });
-      }
       setFavoriteSkills(mockFavorites);
     } catch (error) {
       toast({

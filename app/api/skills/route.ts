@@ -138,11 +138,8 @@ export async function POST(request: Request) {
     };
     mockUploadedSkills.unshift(uploadedSkill);
 
-    // Signal that skills have been updated
-    // This will trigger refresh in other pages via localStorage
-    if (typeof window !== 'undefined') {
-      localStorage?.setItem('skillsUpdated', 'true');
-    }
+    // Note: localStorage cannot be accessed server-side
+    // The client will handle setting the flag after successful creation
 
     return NextResponse.json({
       skill: newSkill,
