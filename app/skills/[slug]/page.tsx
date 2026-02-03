@@ -109,6 +109,13 @@ export default function SkillDetailPage() {
     checkLikeStatus();
   }, [params.slug]);
 
+  // Re-check install status when skill is loaded
+  useEffect(() => {
+    if (skill) {
+      checkInstallStatus();
+    }
+  }, [skill]);
+
   // Scroll observer for active section
   useEffect(() => {
     const handleScroll = () => {
@@ -283,7 +290,10 @@ export default function SkillDetailPage() {
     try {
       const response = await fetch('/api/me/installed');
       const data = await response.json();
-      const installed = data.installedSkills.some((item: any) => item.skill?.slug === params.slug);
+      // Check both by slug and by ID to be safe
+      const installed = data.installedSkills.some((item: any) =>
+        item.skill?.slug === params.slug || item.skill?.id === skill?.id
+      );
       setIsInstalled(installed);
     } catch (error) {
       console.error('Failed to check install status');
@@ -300,6 +310,15 @@ export default function SkillDetailPage() {
   };
 
   const handleInstall = async () => {
+    if (!skill) {
+      toast({
+        title: 'Error',
+        description: 'Skill data not loaded yet',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!isInstalled) {
       // Install skill
       setInstalling(true);
@@ -307,7 +326,7 @@ export default function SkillDetailPage() {
         const response = await fetch('/api/me/installed', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ skillId: skill?.id }),
+          body: JSON.stringify({ skillId: skill.id }),
         });
 
         if (response.ok) {
@@ -315,6 +334,15 @@ export default function SkillDetailPage() {
           toast({
             title: 'Success',
             description: 'Skill added to your collection',
+          });
+          // Re-check install status to sync
+          setTimeout(checkInstallStatus, 100);
+        } else {
+          const error = await response.json();
+          toast({
+            title: 'Error',
+            description: error.error || 'Failed to install skill',
+            variant: 'destructive',
           });
         }
       } catch (error) {
@@ -333,7 +361,7 @@ export default function SkillDetailPage() {
         const response = await fetch('/api/me/installed', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ skillId: skill?.id, action: 'uninstall' }),
+          body: JSON.stringify({ skillId: skill.id, action: 'uninstall' }),
         });
 
         if (response.ok) {
@@ -341,6 +369,15 @@ export default function SkillDetailPage() {
           toast({
             title: 'Success',
             description: 'Skill removed from your collection',
+          });
+          // Re-check install status to sync
+          setTimeout(checkInstallStatus, 100);
+        } else {
+          const error = await response.json();
+          toast({
+            title: 'Error',
+            description: error.error || 'Failed to uninstall skill',
+            variant: 'destructive',
           });
         }
       } catch (error) {

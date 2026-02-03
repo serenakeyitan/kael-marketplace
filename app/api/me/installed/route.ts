@@ -113,7 +113,7 @@ export async function DELETE(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { skillId, isEnabled } = body;
+    const { skillId, isEnabled, action } = body;
 
     if (!skillId) {
       return NextResponse.json(
@@ -122,7 +122,25 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Find and update installed skill
+    // Handle uninstall action
+    if (action === 'uninstall') {
+      // Remove from installed skills
+      const initialLength = installedSkills.length;
+      installedSkills = installedSkills.filter(i => i.skillId !== skillId);
+
+      if (installedSkills.length === initialLength) {
+        return NextResponse.json(
+          { error: 'Skill not found in installed skills' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        message: 'Skill uninstalled successfully',
+      });
+    }
+
+    // Handle enable/disable
     const installedSkill = installedSkills.find(i => i.skillId === skillId);
     if (!installedSkill) {
       return NextResponse.json(
@@ -131,7 +149,9 @@ export async function PATCH(request: Request) {
       );
     }
 
-    installedSkill.isEnabled = isEnabled;
+    if (isEnabled !== undefined) {
+      installedSkill.isEnabled = isEnabled;
+    }
 
     return NextResponse.json({
       updated: installedSkill,
