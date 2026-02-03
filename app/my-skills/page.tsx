@@ -42,6 +42,7 @@ import {
   Heart,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { formatTimeAgo, formatTimeAgoVerbose } from '@/lib/time-utils';
 
 interface InstalledSkillData {
   skillId: string;
@@ -475,14 +476,14 @@ export default function MySkillsPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <p className="text-muted-foreground mb-1">Installed</p>
-                        <p className="font-medium">
-                          {formatDistanceToNow(new Date(item.installedAt), { addSuffix: true })}
+                        <p className="font-medium" title={formatTimeAgoVerbose(item.installedAt)}>
+                          {formatTimeAgo(item.installedAt)}
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground mb-1">Last Used</p>
-                        <p className="font-medium">
-                          {formatDistanceToNow(new Date(item.lastUsed), { addSuffix: true })}
+                        <p className="font-medium" title={formatTimeAgoVerbose(item.lastUsed)}>
+                          {formatTimeAgo(item.lastUsed)}
                         </p>
                       </div>
                       <div>
@@ -643,15 +644,15 @@ export default function MySkillsPage() {
                             <Calendar className="h-3.5 w-3.5" />
                             Last Updated
                           </p>
-                          <p className="font-medium">
-                            {formatDistanceToNow(new Date(skill.lastUpdated), { addSuffix: true })}
+                          <p className="font-medium" title={formatTimeAgoVerbose(skill.lastUpdated)}>
+                            {formatTimeAgo(skill.lastUpdated)}
                           </p>
                         </div>
                       </div>
                       {skill.publishedAt && (
                         <div className="mt-3 pt-3 border-t">
-                          <p className="text-xs text-muted-foreground">
-                            Published {formatDistanceToNow(new Date(skill.publishedAt), { addSuffix: true })}
+                          <p className="text-xs text-muted-foreground" title={`Published ${formatTimeAgoVerbose(skill.publishedAt)}`}>
+                            Published {formatTimeAgo(skill.publishedAt)}
                           </p>
                         </div>
                       )}

@@ -921,36 +921,36 @@ export const mockSkills: Skill[] = [
 export const mockInstalledSkills: InstalledSkill[] = [
   {
     skillId: '1',
-    installedAt: '2024-01-15T10:30:00Z',
-    lastUsed: '2024-01-30T14:22:00Z',
+    installedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    lastUsed: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
     isEnabled: true,
     usageCount: 45,
   },
   {
     skillId: '3',
-    installedAt: '2024-01-10T08:15:00Z',
-    lastUsed: '2024-01-29T16:45:00Z',
+    installedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks ago
+    lastUsed: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
     isEnabled: true,
     usageCount: 128,
   },
   {
     skillId: '5',
-    installedAt: '2024-01-20T11:00:00Z',
-    lastUsed: '2024-01-28T09:30:00Z',
+    installedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(), // 1.5 months ago
+    lastUsed: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week ago
     isEnabled: true,
     usageCount: 23,
   },
   {
     skillId: '7',
-    installedAt: '2024-01-08T13:45:00Z',
-    lastUsed: '2024-01-25T10:15:00Z',
+    installedAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(), // 6 months ago
+    lastUsed: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), // 2 months ago
     isEnabled: false,
     usageCount: 67,
   },
   {
     skillId: '17',
-    installedAt: '2024-01-22T09:20:00Z',
-    lastUsed: '2024-01-31T11:30:00Z',
+    installedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year ago
+    lastUsed: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
     isEnabled: true,
     usageCount: 34,
   },
