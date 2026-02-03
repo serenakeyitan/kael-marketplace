@@ -168,9 +168,16 @@ export default function MySkillsPage() {
 
   const fetchFavoriteSkills = async () => {
     try {
-      // Simulate fetching favorite skills
-      const mockFavorites: FavoriteSkillData[] = [
-        {
+      // Get liked skills from localStorage
+      const likedSkillIds = JSON.parse(localStorage.getItem('likedSkills') || '[]');
+
+      // Simulate fetching favorite skills - in production, this would fetch from API
+      // For now, create mock data only for skills that are actually liked
+      const mockFavorites: FavoriteSkillData[] = [];
+
+      // Only add skills if they exist in localStorage liked skills
+      if (likedSkillIds.includes('1') || likedSkillIds.length === 0) { // Show some defaults if empty
+        mockFavorites.push({
           skillId: '1',
           likedAt: new Date().toISOString(),
           skill: {
@@ -188,8 +195,11 @@ export default function MySkillsPage() {
             demoPrompt: '',
             examples: []
           }
-        },
-        {
+        });
+      }
+
+      if (likedSkillIds.includes('2')) {
+        mockFavorites.push({
           skillId: '2',
           likedAt: new Date().toISOString(),
           skill: {
@@ -207,8 +217,8 @@ export default function MySkillsPage() {
             demoPrompt: '',
             examples: []
           }
-        }
-      ];
+        });
+      }
       setFavoriteSkills(mockFavorites);
     } catch (error) {
       toast({
@@ -298,13 +308,19 @@ export default function MySkillsPage() {
   };
 
   const handleUnlike = async (skillId: string, skillName: string) => {
-    setUpdatingSkill(skillId);
+    // Don't set updating skill for card UI since it's handled by the card itself
     try {
       // In production, this would call an API to unlike
       setFavoriteSkills(prev => prev.filter(item => item.skillId !== skillId));
+
+      // Update localStorage to persist the unlike state
+      const likedSkills = JSON.parse(localStorage.getItem('likedSkills') || '[]');
+      const updatedLikedSkills = likedSkills.filter((id: string) => id !== skillId);
+      localStorage.setItem('likedSkills', JSON.stringify(updatedLikedSkills));
+
       toast({
-        title: 'Success',
-        description: `${skillName} removed from favorites`,
+        title: 'Removed from favorites',
+        description: `${skillName} has been removed from your favorites`,
       });
     } catch (error) {
       toast({
@@ -312,8 +328,6 @@ export default function MySkillsPage() {
         description: 'Failed to remove from favorites',
         variant: 'destructive',
       });
-    } finally {
-      setUpdatingSkill(null);
     }
   };
 
@@ -527,6 +541,13 @@ export default function MySkillsPage() {
                 <SkillCardNew
                   key={item.skillId}
                   skill={item.skill}
+                  initialLiked={true}
+                  onLikeChange={(liked) => {
+                    if (!liked) {
+                      // Remove from favorites when unliked
+                      handleUnlike(item.skillId, item.skill.name);
+                    }
+                  }}
                   onUseSkill={() => {
                     toast({
                       title: 'Opening in Kael',

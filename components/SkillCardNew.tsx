@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
@@ -22,12 +22,19 @@ import {
 interface SkillCardNewProps {
   skill: Skill;
   onUseSkill?: () => void;
+  initialLiked?: boolean;
+  onLikeChange?: (liked: boolean) => void;
 }
 
-export default function SkillCardNew({ skill, onUseSkill }: SkillCardNewProps) {
-  const [isLiked, setIsLiked] = useState(false);
+export default function SkillCardNew({ skill, onUseSkill, initialLiked = false, onLikeChange }: SkillCardNewProps) {
+  const [isLiked, setIsLiked] = useState(initialLiked);
   const [showRedirectDialog, setShowRedirectDialog] = useState(false);
   const router = useRouter();
+
+  // Sync liked state with prop changes
+  useEffect(() => {
+    setIsLiked(initialLiked);
+  }, [initialLiked]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Only navigate if not clicking on a button or link
@@ -52,7 +59,9 @@ export default function SkillCardNew({ skill, onUseSkill }: SkillCardNewProps) {
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsLiked(!isLiked);
+    const newLikedState = !isLiked;
+    setIsLiked(newLikedState);
+    onLikeChange?.(newLikedState);
   };
 
   // Generate a gradient background for the card based on category
