@@ -93,6 +93,8 @@ export default function SkillDetailPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [replyTexts, setReplyTexts] = useState<{ [key: string]: string }>({});
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const [readmeContent, setReadmeContent] = useState<string>('');
 
   // Refs for sections
   const overviewRef = useRef<HTMLDivElement>(null);
@@ -156,8 +158,22 @@ export default function SkillDetailPage() {
   };
 
   const fetchReviews = () => {
-    // Mock reviews data with replies
+    // Mock reviews data with replies - sorted by latest first
     const mockReviews: Review[] = [
+      {
+        id: '4',
+        userName: 'TechEnthusiast',
+        rating: 5,
+        comment: 'Just started using this today and I\'m blown away by the capabilities!',
+        timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+        helpful: 0,
+        notHelpful: 0,
+        isRecommended: true,
+        userVote: null,
+        replies: [],
+        showReplies: false,
+        showReplyForm: false,
+      },
       {
         id: '1',
         userName: 'zhuD',
@@ -188,6 +204,20 @@ export default function SkillDetailPage() {
             userVote: null,
           },
         ],
+        showReplies: false,
+        showReplyForm: false,
+      },
+      {
+        id: '5',
+        userName: 'DataScientist',
+        rating: 3,
+        comment: 'Works well but could use better documentation.',
+        timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        helpful: 4,
+        notHelpful: 1,
+        isRecommended: false,
+        userVote: null,
+        replies: [],
         showReplies: false,
         showReplyForm: false,
       },
@@ -229,7 +259,23 @@ export default function SkillDetailPage() {
         showReplies: false,
         showReplyForm: false,
       },
+      {
+        id: '6',
+        userName: 'BeginnersGuide',
+        rating: 2,
+        comment: 'Too complex for beginners. Needs a simpler interface.',
+        timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+        helpful: 6,
+        notHelpful: 8,
+        isRecommended: false,
+        userVote: null,
+        replies: [],
+        showReplies: false,
+        showReplyForm: false,
+      },
     ];
+    // Sort by timestamp, latest first
+    mockReviews.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     setReviews(mockReviews);
   };
 
@@ -538,7 +584,8 @@ export default function SkillDetailPage() {
         showReplyForm: false,
       };
 
-      setReviews([newReview, ...reviews]);
+      // Add new review at the beginning (latest first)
+      setReviews([newReview, ...reviews].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()));
       setShowReviewForm(false);
       setReviewText('');
       setUserRating(0);
@@ -759,89 +806,66 @@ export default function SkillDetailPage() {
               ))}
             </div>
 
-            {/* Overview Section */}
+            {/* README Section - Single Card for All Documentation */}
             <div ref={overviewRef}>
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BookOpen className="h-5 w-5" />
-                    Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {skill.longDescription}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Features Section */}
-            <div ref={featuresRef}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5" />
-                    Key Features
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {[
-                      'Advanced AI-powered analysis and generation',
-                      'Customizable workflows and templates',
-                      'Real-time collaboration features',
-                      'Export to multiple formats',
-                      'Integration with popular tools',
-                    ].map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Examples Section */}
-            <div ref={examplesRef}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Code className="h-5 w-5" />
-                    Example Prompts
+                    Documentation
                   </CardTitle>
                   <CardDescription>
-                    Try these prompts to get started
+                    Complete guide and documentation for {skill.name}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {skill.examples?.map((example, index) => (
-                      <div
-                        key={index}
-                        className="p-4 bg-muted rounded-lg group relative cursor-pointer hover:bg-muted/80 transition-colors"
-                      >
-                        <p className="text-sm font-medium mb-1">Example {index + 1}</p>
-                        <p className="text-muted-foreground">{example}</p>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => {
-                            navigator.clipboard.writeText(example);
-                            toast({
-                              title: 'Copied!',
-                              description: 'Example prompt copied to clipboard',
-                            });
-                          }}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
+                  <div className="prose prose-sm max-w-none">
+                    {/* In production, this would render the actual README.md content */}
+                    {readmeContent ? (
+                      <div dangerouslySetInnerHTML={{ __html: readmeContent }} />
+                    ) : (
+                      <div className="space-y-6">
+                        <section>
+                          <h3 className="text-lg font-semibold mb-3">Overview</h3>
+                          <p className="text-muted-foreground leading-relaxed">
+                            {skill.longDescription}
+                          </p>
+                        </section>
+
+                        <section>
+                          <h3 className="text-lg font-semibold mb-3">Key Features</h3>
+                          <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
+                            <li>Advanced AI-powered analysis and generation</li>
+                            <li>Customizable workflows and templates</li>
+                            <li>Real-time collaboration features</li>
+                            <li>Export to multiple formats</li>
+                            <li>Integration with popular tools</li>
+                          </ul>
+                        </section>
+
+                        <section>
+                          <h3 className="text-lg font-semibold mb-3">Getting Started</h3>
+                          <div className="space-y-3">
+                            <p className="text-muted-foreground">
+                              To get started with {skill.name}, simply click the "Start Chat" button above.
+                            </p>
+                            <div className="bg-muted p-4 rounded-lg">
+                              <p className="text-sm font-medium mb-2">Example Usage:</p>
+                              <code className="text-sm text-muted-foreground">
+                                {skill.examples?.[0] || 'Ask me to help with your specific task'}
+                              </code>
+                            </div>
+                          </div>
+                        </section>
+
+                        <section>
+                          <h3 className="text-lg font-semibold mb-3">Version History</h3>
+                          <div className="text-muted-foreground">
+                            <p>Version {skill.version || '1.0.0'}</p>
+                            <p className="text-sm">Last updated: {formatDistanceToNow(new Date(skill.lastUpdated), { addSuffix: true })}</p>
+                          </div>
+                        </section>
                       </div>
-                    )) || (
-                      <p className="text-muted-foreground">No examples available yet.</p>
                     )}
                   </div>
                 </CardContent>
@@ -869,13 +893,34 @@ export default function SkillDetailPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Rating Distribution */}
+                {/* Rating Distribution - Clickable */}
                 <div className="space-y-2">
+                  {selectedRating && (
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-muted-foreground">
+                        Showing {selectedRating}-star reviews
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedRating(null)}
+                      >
+                        Clear filter
+                      </Button>
+                    </div>
+                  )}
                   {[5, 4, 3, 2, 1].map(rating => {
                     const count = reviews.filter(r => r.rating === rating).length;
                     const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                     return (
-                      <div key={rating} className="flex items-center gap-2">
+                      <div
+                        key={rating}
+                        className={cn(
+                          "flex items-center gap-2 cursor-pointer rounded-md px-2 py-1 transition-colors",
+                          selectedRating === rating ? "bg-muted" : "hover:bg-muted/50"
+                        )}
+                        onClick={() => setSelectedRating(selectedRating === rating ? null : rating)}
+                      >
                         <span className="text-sm w-3">{rating}</span>
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                         <Progress value={percentage} className="flex-1 h-2" />
@@ -954,9 +999,11 @@ export default function SkillDetailPage() {
 
                 <Separator />
 
-                {/* Reviews List */}
-                <div className="space-y-4 max-h-[600px] overflow-y-auto">
-                  {reviews.map(review => (
+                {/* Reviews List - Fixed height and scrollable */}
+                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                  {reviews
+                    .filter(review => selectedRating === null || review.rating === selectedRating)
+                    .map(review => (
                     <div key={review.id} className="space-y-2">
                       <div className="flex items-start gap-3">
                         <Avatar className="h-8 w-8">
@@ -1137,9 +1184,11 @@ export default function SkillDetailPage() {
                     </div>
                   ))}
 
-                  {reviews.length === 0 && (
+                  {reviews.filter(review => selectedRating === null || review.rating === selectedRating).length === 0 && (
                     <p className="text-center text-muted-foreground text-sm py-4">
-                      No reviews yet. Be the first to review!
+                      {selectedRating
+                        ? `No ${selectedRating}-star reviews yet.`
+                        : 'No reviews yet. Be the first to review!'}
                     </p>
                   )}
                 </div>
