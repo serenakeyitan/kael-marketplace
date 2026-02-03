@@ -48,12 +48,13 @@ export interface Skill {
   audienceTags: AudienceTag[];
   author: {
     name: string;
+    username?: string;
     avatar?: string;
     isOfficial: boolean;
   };
   stats: {
     installs: number;
-    weeklyUsage: number;
+    totalConversations: number;
     rating?: number;
   };
   version: string;

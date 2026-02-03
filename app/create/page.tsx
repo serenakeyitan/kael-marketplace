@@ -55,14 +55,14 @@ import {
 } from 'lucide-react';
 
 const categories: SkillCategory[] = [
-  'Job Hunting',
-  'Health & Lifestyle',
+  'Career',
+  'Health',
   'Academic',
   'Business',
   'Programming',
   'Marketing',
-  'Image Generator',
-  'Prompt Generator',
+  'Image',
+  'Prompt',
 ];
 
 const audienceTags: AudienceTag[] = [
@@ -119,7 +119,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function CreateSkillPage() {
   const router = useRouter();
-  const { user, isCreator } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentExample, setCurrentExample] = useState('');
@@ -200,25 +200,6 @@ export default function CreateSkillPage() {
       form.setValue('audienceTags', [...currentTags, tag]);
     }
   };
-
-  if (!isCreator) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Card className="text-center py-12">
-          <CardContent>
-            <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Creator Mode Required</h2>
-            <p className="text-muted-foreground mb-4">
-              You need to switch to Creator mode to upload skills
-            </p>
-            <Button onClick={() => router.push('/my-skills')}>
-              Go to My Skills
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skill } from '@/types/skill';
 import {
   Users,
-  Zap,
+  MessageCircle,
   Star,
   ArrowRight,
   ExternalLink,
@@ -87,8 +87,8 @@ export default function SkillCard({ skill, onUseInKael }: SkillCardProps) {
               {skill.stats.installs.toLocaleString()}
             </span>
             <span className="flex items-center gap-1">
-              <Zap className="h-3.5 w-3.5" />
-              {skill.stats.weeklyUsage.toLocaleString()}/wk
+              <MessageCircle className="h-3.5 w-3.5" />
+              {(skill.stats.totalConversations / 1000).toFixed(1)}k
             </span>
             {skill.stats.rating && (
               <span className="flex items-center gap-1">

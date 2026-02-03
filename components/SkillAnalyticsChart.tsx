@@ -181,7 +181,7 @@ export default function SkillAnalyticsChart() {
   return (
     <div className="w-full">
       {/* Compact Header Section */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900"># Tasks automated by Skills</h2>
           <p className="text-sm text-gray-600 mt-0.5">Turn routine work into skills and let them run for you</p>
@@ -202,7 +202,7 @@ export default function SkillAnalyticsChart() {
       </div>
 
       {/* Controls Row */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-3">
         {/* View Toggle */}
         <div className="flex gap-1 p-0.5 bg-gray-100 rounded-lg">
           <button
@@ -270,7 +270,7 @@ export default function SkillAnalyticsChart() {
       </div>
 
       {/* Chart */}
-      <div className="h-[280px] w-full bg-gradient-to-br from-gray-50 via-white to-gray-50 border border-gray-200 rounded-lg p-2">
+      <div className="h-[360px] w-full py-3">
         {loading ? (
           <div className="h-full flex flex-col items-center justify-center gap-4">
             <div className="animate-pulse flex items-center gap-3">
@@ -289,7 +289,7 @@ export default function SkillAnalyticsChart() {
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={data}
-              margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+              margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
             >
                 <defs>
                   <linearGradient id="colorDaily" x1="0" y1="0" x2="0" y2="1">
@@ -384,8 +384,8 @@ export default function SkillAnalyticsChart() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={90}
-                    innerRadius={55}
+                    outerRadius={110}
+                    innerRadius={70}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -401,7 +401,7 @@ export default function SkillAnalyticsChart() {
             {/* Legend */}
             <div className="w-[260px] flex flex-col justify-center pl-4">
               <h3 className="text-xs font-semibold text-gray-900 mb-2">Domain Distribution</h3>
-              <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-2">
+              <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-2">
                 {distributionData.map((item) => (
                   <div key={item.name} className="flex items-center justify-between group hover:bg-gray-50 px-1 py-0.5 rounded">
                     <div className="flex items-center gap-1.5">

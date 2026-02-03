@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import SkillCardNew from '@/components/SkillCardNew';
 import {
   User,
+  Users,
   Settings,
   Trophy,
   Zap,
@@ -78,6 +79,7 @@ export default function ProfilePage() {
   const [createdSkills, setCreatedSkills] = useState<any[]>([]);
   const [installedSkills, setInstalledSkills] = useState<any[]>([]);
   const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
+  const [followingList, setFollowingList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -145,7 +147,7 @@ export default function ProfilePage() {
         category: 'Academic',
         stats: {
           installs: 5230,
-          weeklyUsage: 12850,
+          totalConversations: 12850,
           rating: 4.9
         },
         createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -153,12 +155,12 @@ export default function ProfilePage() {
       {
         id: '2',
         name: 'Smart Flashcards',
-        slug: 'smart-flashcards',
+        slug: 'flashcards',
         shortDescription: 'AI-powered flashcard generation',
         category: 'Academic',
         stats: {
           installs: 3890,
-          weeklyUsage: 11500,
+          totalConversations: 11500,
           rating: 4.8
         },
         createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
@@ -171,7 +173,7 @@ export default function ProfilePage() {
         category: 'Programming',
         stats: {
           installs: 3210,
-          weeklyUsage: 9800,
+          totalConversations: 9800,
           rating: 4.7
         },
         createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
@@ -188,7 +190,7 @@ export default function ProfilePage() {
         category: 'Programming',
         stats: {
           installs: 2870,
-          weeklyUsage: 8900,
+          totalConversations: 8900,
           rating: 4.8
         }
       },
@@ -200,9 +202,53 @@ export default function ProfilePage() {
         category: 'Academic',
         stats: {
           installs: 2560,
-          weeklyUsage: 7800,
+          totalConversations: 7800,
           rating: 4.6
         }
+      }
+    ]);
+
+    // Mock following list
+    setFollowingList([
+      {
+        id: '1',
+        username: 'the-glitch',
+        name: 'The Glitch',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=the-glitch',
+        description: 'Independent researcher on AI skills and prompt engineering',
+        followers: 626,
+        skillsCreated: 8,
+        isFollowing: true
+      },
+      {
+        id: '2',
+        username: 'code-wizard',
+        name: 'Code Wizard',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=code-wizard',
+        description: 'Building developer tools and automation skills',
+        followers: 1250,
+        skillsCreated: 15,
+        isFollowing: true
+      },
+      {
+        id: '3',
+        username: 'data-ninja',
+        name: 'Data Ninja',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=data-ninja',
+        description: 'Data analysis and visualization expert',
+        followers: 890,
+        skillsCreated: 12,
+        isFollowing: true
+      },
+      {
+        id: '4',
+        username: 'ai-artist',
+        name: 'AI Artist',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ai-artist',
+        description: 'Creating beautiful AI-powered creative tools',
+        followers: 2340,
+        skillsCreated: 23,
+        isFollowing: true
       }
     ]);
 
@@ -306,85 +352,127 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Separated into User and Creator Stats */}
       <div className="px-6 -mt-12 relative z-10 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-          <Card className="bg-white/95 backdrop-blur">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Code className="h-4 w-4 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{userStats.skillsCreated}</p>
-                  <p className="text-sm text-muted-foreground">Skills Created</p>
-                </div>
+        <div className="space-y-6 mb-8">
+          {/* User Stats */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-600 mb-3">Your Activity</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="bg-white/95 backdrop-blur">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Package className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{userStats.skillsInstalled}</p>
+                      <p className="text-sm text-muted-foreground">Skills You Installed</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/95 backdrop-blur">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-orange-100 rounded-lg">
+                      <Activity className="h-4 w-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{(userStats.totalUsage / 1000).toFixed(0)}k</p>
+                      <p className="text-sm text-muted-foreground">Your Total Usage</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/95 backdrop-blur">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Heart className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">12</p>
+                      <p className="text-sm text-muted-foreground">Favorite Skills</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Creator Stats - Only show if user has created skills */}
+          {isCreator && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-600 mb-3">Creator Stats</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="bg-white/95 backdrop-blur">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <Code className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{userStats.skillsCreated}</p>
+                        <p className="text-sm text-muted-foreground">Skills Created</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/95 backdrop-blur">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <TrendingUp className="h-4 w-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{(userStats.totalInstalls / 1000).toFixed(1)}k</p>
+                        <p className="text-sm text-muted-foreground">People Installed Your Skills</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/95 backdrop-blur">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-yellow-100 rounded-lg">
+                        <Star className="h-4 w-4 text-yellow-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{userStats.averageRating}</p>
+                        <p className="text-sm text-muted-foreground">Your Avg Rating</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/95 backdrop-blur">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-pink-100 rounded-lg">
+                        <Users className="h-4 w-4 text-pink-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">2.3k</p>
+                        <p className="text-sm text-muted-foreground">Followers</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/95 backdrop-blur">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Package className="h-4 w-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{userStats.skillsInstalled}</p>
-                  <p className="text-sm text-muted-foreground">Installed</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/95 backdrop-blur">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{(userStats.totalInstalls / 1000).toFixed(1)}k</p>
-                  <p className="text-sm text-muted-foreground">Total Installs</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/95 backdrop-blur">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <Zap className="h-4 w-4 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{(userStats.totalUsage / 1000).toFixed(0)}k</p>
-                  <p className="text-sm text-muted-foreground">Total Usage</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/95 backdrop-blur">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-yellow-100 rounded-lg">
-                  <Star className="h-4 w-4 text-yellow-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{userStats.averageRating}</p>
-                  <p className="text-sm text-muted-foreground">Avg Rating</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Main Content */}
       <div className="px-6 pb-12 max-w-7xl mx-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-md grid-cols-4">
+          <TabsList className="grid w-full max-w-lg grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="created">Created</TabsTrigger>
             <TabsTrigger value="installed">Installed</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
+            <TabsTrigger value="following">Following</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -578,6 +666,78 @@ export default function ProfilePage() {
                   );
                 })}
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="following" className="mt-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-6">Following</h2>
+              {followingList.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {followingList.map((creator) => (
+                    <Card key={creator.id} className="hover:shadow-lg transition-shadow">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <Link href={`/users/${creator.username}`} className="flex items-center gap-3 flex-1">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={creator.avatar} />
+                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                                {creator.name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-gray-900 truncate">{creator.name}</h3>
+                              <p className="text-sm text-gray-500">@{creator.username}</p>
+                            </div>
+                          </Link>
+                        </div>
+
+                        <p className="text-sm text-gray-600 mt-3 line-clamp-2">
+                          {creator.description}
+                        </p>
+
+                        <div className="flex items-center justify-between mt-4">
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3.5 w-3.5" />
+                              {creator.followers} followers
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Code className="h-3.5 w-3.5" />
+                              {creator.skillsCreated} skills
+                            </span>
+                          </div>
+                        </div>
+
+                        <Link href={`/users/${creator.username}`} className="block mt-4">
+                          <Button variant="outline" size="sm" className="w-full">
+                            View Profile
+                          </Button>
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <div className="flex justify-center mb-4">
+                      <div className="p-4 bg-muted rounded-full">
+                        <Users className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">No Following Yet</h3>
+                    <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+                      Start following creators to see their latest skills here
+                    </p>
+                    <Link href="/">
+                      <Button>
+                        Explore Creators
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
         </Tabs>

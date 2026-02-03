@@ -42,7 +42,7 @@ export async function GET(request: Request) {
   // Sort
   switch (sort) {
     case 'popular':
-      filteredSkills.sort((a, b) => b.stats.installs - a.stats.installs);
+      filteredSkills.sort((a, b) => b.stats.totalConversations - a.stats.totalConversations);
       break;
     case 'new':
       filteredSkills.sort((a, b) =>
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       );
       break;
     case 'usage':
-      filteredSkills.sort((a, b) => b.stats.weeklyUsage - a.stats.weeklyUsage);
+      filteredSkills.sort((a, b) => b.stats.totalConversations - a.stats.totalConversations);
       break;
     case 'rating':
       filteredSkills.sort((a, b) => (b.stats.rating || 0) - (a.stats.rating || 0));
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
       },
       stats: {
         installs: 0,
-        weeklyUsage: 0,
+        totalConversations: 0,
       },
       version: body.version || '1.0.0',
       lastUpdated: new Date().toISOString().split('T')[0],

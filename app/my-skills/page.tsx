@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import SkillCardNew from '@/components/SkillCardNew';
+import { Skill } from '@/types/skill';
 import {
   Package,
   Upload,
@@ -37,6 +39,7 @@ import {
   TrendingUp,
   Settings,
   ArrowUpRight,
+  Heart,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -47,6 +50,12 @@ interface InstalledSkillData {
   isEnabled: boolean;
   usageCount: number;
   skill: any;
+}
+
+interface FavoriteSkillData {
+  skillId: string;
+  likedAt: string;
+  skill: Skill;
 }
 
 interface UploadedSkillData {
@@ -69,13 +78,16 @@ export default function MySkillsPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('installed');
   const [installedSkills, setInstalledSkills] = useState<InstalledSkillData[]>([]);
+  const [favoriteSkills, setFavoriteSkills] = useState<FavoriteSkillData[]>([]);
   const [uploadedSkills, setUploadedSkills] = useState<UploadedSkillData[]>([]);
   const [loadingInstalled, setLoadingInstalled] = useState(true);
+  const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [loadingUploaded, setLoadingUploaded] = useState(true);
   const [updatingSkill, setUpdatingSkill] = useState<string | null>(null);
 
   useEffect(() => {
     fetchInstalledSkills();
+    fetchFavoriteSkills();
     if (isCreator) {
       fetchUploadedSkills();
     }
@@ -94,6 +106,61 @@ export default function MySkillsPage() {
       });
     } finally {
       setLoadingInstalled(false);
+    }
+  };
+
+  const fetchFavoriteSkills = async () => {
+    try {
+      // Simulate fetching favorite skills
+      const mockFavorites: FavoriteSkillData[] = [
+        {
+          skillId: '1',
+          likedAt: new Date().toISOString(),
+          skill: {
+            id: '1',
+            slug: 'literature-review',
+            name: 'Literature Review Assistant',
+            shortDescription: 'AI-powered literature review with citation management',
+            longDescription: '',
+            category: 'Academic',
+            audienceTags: [],
+            author: { name: 'Kael Team', isOfficial: true },
+            stats: { installs: 45230, totalConversations: 128500, rating: 4.9 },
+            version: '1.0',
+            lastUpdated: new Date().toISOString(),
+            demoPrompt: '',
+            examples: []
+          }
+        },
+        {
+          skillId: '2',
+          likedAt: new Date().toISOString(),
+          skill: {
+            id: '2',
+            slug: 'code-review',
+            name: 'Code Review Pro',
+            shortDescription: 'Automated code review with best practices',
+            longDescription: '',
+            category: 'Programming',
+            audienceTags: [],
+            author: { name: 'DevTools Inc', isOfficial: false },
+            stats: { installs: 32100, totalConversations: 98000, rating: 4.7 },
+            version: '1.0',
+            lastUpdated: new Date().toISOString(),
+            demoPrompt: '',
+            examples: []
+          }
+        }
+      ];
+      setFavoriteSkills(mockFavorites);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load favorite skills',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingFavorites(false);
     }
   };
 
@@ -171,6 +238,26 @@ export default function MySkillsPage() {
     }
   };
 
+  const handleUnlike = async (skillId: string, skillName: string) => {
+    setUpdatingSkill(skillId);
+    try {
+      // In production, this would call an API to unlike
+      setFavoriteSkills(prev => prev.filter(item => item.skillId !== skillId));
+      toast({
+        title: 'Success',
+        description: `${skillName} removed from favorites`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove from favorites',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingSkill(null);
+    }
+  };
+
   const handlePublish = async (skillId: string) => {
     setUpdatingSkill(skillId);
     try {
@@ -223,24 +310,28 @@ export default function MySkillsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">My Skills</h1>
         <p className="text-muted-foreground">
-          Manage your installed skills and {isCreator ? 'uploaded creations' : 'settings'}
+          Manage your installed skills, favorites{isCreator ? ', and uploaded creations' : ''}
         </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className={`grid w-full max-w-lg grid-cols-${isCreator ? '3' : '2'}`}>
           <TabsTrigger value="installed" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
-            Installed Skills
+            Installed
+          </TabsTrigger>
+          <TabsTrigger value="favorites" className="flex items-center gap-2">
+            <Heart className="h-4 w-4" />
+            Favorites
           </TabsTrigger>
           {isCreator && (
             <TabsTrigger value="uploaded" className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
-              Uploaded Skills
+              Uploaded
             </TabsTrigger>
           )}
         </TabsList>
@@ -347,6 +438,43 @@ export default function MySkillsPage() {
                     </div>
                   </CardContent>
                 </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Favorite Skills Tab */}
+        <TabsContent value="favorites" className="mt-6">
+          {loadingFavorites ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : favoriteSkills.length === 0 ? (
+            <Card className="text-center py-12">
+              <CardContent>
+                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No favorite skills yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Like skills in the marketplace to add them to your favorites
+                </p>
+                <Button onClick={() => router.push('/')}>
+                  Browse Marketplace
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-3 lg:gap-4">
+              {favoriteSkills.map((item) => (
+                <SkillCardNew
+                  key={item.skillId}
+                  skill={item.skill}
+                  onUseSkill={() => {
+                    toast({
+                      title: 'Opening in Kael',
+                      description: `Loading ${item.skill.name} in Kael chat...`,
+                    });
+                  }}
+                />
               ))}
             </div>
           )}

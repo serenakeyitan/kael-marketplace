@@ -93,19 +93,19 @@ export default function Home() {
   }, [fetchSkills]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Analytics Chart */}
-      <div className="px-6 py-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 border-b border-gray-200">
-        <div className="max-w-[1400px] mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Analytics Chart - Full width section */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="px-4 lg:px-6 xl:px-8 py-3">
           <SkillAnalyticsChart />
         </div>
       </div>
 
       {/* Filter and Search Section */}
-      <div className="bg-white sticky top-0 z-40 border-b">
-        <div className="px-6">
+      <div className="bg-white sticky top-0 z-40 border-b border-gray-100">
+        <div className="px-4 lg:px-6 xl:px-8">
           {/* Category Pills */}
-          <div className="max-w-7xl mx-auto pt-4">
+          <div className="pt-4">
             <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-3">
               {categories.map(category => (
                 <button
@@ -125,7 +125,7 @@ export default function Home() {
           </div>
 
           {/* Search Bar and Time Filters Row */}
-          <div className="max-w-7xl mx-auto pb-4">
+          <div className="pb-4">
             <div className="flex items-center gap-4">
               {/* Search Bar */}
               <div className="flex-1 relative">
@@ -195,8 +195,8 @@ export default function Home() {
       </div>
 
       {/* Main Content Area */}
-      <div className="px-6 py-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="px-4 lg:px-6 xl:px-8 py-6">
+        <div>
           {/* Active Filters Display */}
           <div className="mb-4 flex items-center gap-2 text-sm">
             <span className="text-gray-500">Showing:</span>
@@ -235,7 +235,7 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-3 lg:gap-4">
                 {skills.map(skill => (
                   <SkillCardNew
                     key={skill.id}

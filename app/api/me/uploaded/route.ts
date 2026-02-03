@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       },
       stats: {
         installs: 0,
-        weeklyUsage: 0,
+        totalConversations: 0,
       },
       version: body.version || '1.0.0',
       lastUpdated: new Date().toISOString().split('T')[0],

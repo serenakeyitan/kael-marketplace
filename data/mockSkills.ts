@@ -16,7 +16,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 15420,
-      weeklyUsage: 8923,
+      totalConversations: 8923,
       rating: 4.8,
     },
     version: '2.1.0',
@@ -43,7 +43,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 12300,
-      weeklyUsage: 6782,
+      totalConversations: 6782,
       rating: 4.9,
     },
     version: '1.5.3',
@@ -71,7 +71,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 28500,
-      weeklyUsage: 19230,
+      totalConversations: 19230,
       rating: 4.7,
     },
     version: '3.0.1',
@@ -97,7 +97,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 19800,
-      weeklyUsage: 12450,
+      totalConversations: 12450,
       rating: 4.6,
     },
     version: '2.3.0',
@@ -125,7 +125,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 22100,
-      weeklyUsage: 15600,
+      totalConversations: 15600,
       rating: 4.8,
     },
     version: '2.5.0',
@@ -151,7 +151,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 8900,
-      weeklyUsage: 5200,
+      totalConversations: 5200,
       rating: 4.5,
     },
     version: '1.8.2',
@@ -179,7 +179,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 17600,
-      weeklyUsage: 11200,
+      totalConversations: 11200,
       rating: 4.7,
     },
     version: '2.2.1',
@@ -205,7 +205,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 9200,
-      weeklyUsage: 5800,
+      totalConversations: 5800,
       rating: 4.6,
     },
     version: '1.6.0',
@@ -233,7 +233,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 14200,
-      weeklyUsage: 8900,
+      totalConversations: 8900,
       rating: 4.8,
     },
     version: '2.0.0',
@@ -259,7 +259,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 7800,
-      weeklyUsage: 4500,
+      totalConversations: 4500,
       rating: 4.5,
     },
     version: '1.4.1',
@@ -287,7 +287,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 6500,
-      weeklyUsage: 3200,
+      totalConversations: 3200,
       rating: 4.6,
     },
     version: '1.9.0',
@@ -313,7 +313,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 5200,
-      weeklyUsage: 2800,
+      totalConversations: 2800,
       rating: 4.4,
     },
     version: '1.3.2',
@@ -341,7 +341,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 11200,
-      weeklyUsage: 7800,
+      totalConversations: 7800,
       rating: 4.7,
     },
     version: '2.1.0',
@@ -367,7 +367,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 8900,
-      weeklyUsage: 5600,
+      totalConversations: 5600,
       rating: 4.6,
     },
     version: '1.7.3',
@@ -395,7 +395,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 19500,
-      weeklyUsage: 14200,
+      totalConversations: 14200,
       rating: 4.5,
     },
     version: '2.3.1',
@@ -421,7 +421,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 7600,
-      weeklyUsage: 4300,
+      totalConversations: 4300,
       rating: 4.7,
     },
     version: '1.5.0',
@@ -449,7 +449,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 16700,
-      weeklyUsage: 10200,
+      totalConversations: 10200,
       rating: 4.8,
     },
     version: '2.4.0',
@@ -475,7 +475,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 13400,
-      weeklyUsage: 8900,
+      totalConversations: 8900,
       rating: 4.6,
     },
     version: '1.8.5',
@@ -503,7 +503,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 4200,
-      weeklyUsage: 2100,
+      totalConversations: 2100,
       rating: 4.5,
     },
     version: '1.2.0',
@@ -529,7 +529,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 3800,
-      weeklyUsage: 1900,
+      totalConversations: 1900,
       rating: 4.7,
     },
     version: '1.4.2',
@@ -557,7 +557,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 6700,
-      weeklyUsage: 3900,
+      totalConversations: 3900,
       rating: 4.6,
     },
     version: '1.6.1',
@@ -583,7 +583,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 10300,
-      weeklyUsage: 6800,
+      totalConversations: 6800,
       rating: 4.7,
     },
     version: '2.0.3',
@@ -611,7 +611,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 8100,
-      weeklyUsage: 5400,
+      totalConversations: 5400,
       rating: 4.8,
     },
     version: '1.9.2',
@@ -637,7 +637,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 5600,
-      weeklyUsage: 3200,
+      totalConversations: 3200,
       rating: 4.5,
     },
     version: '1.3.0',
@@ -665,7 +665,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 4900,
-      weeklyUsage: 2700,
+      totalConversations: 2700,
       rating: 4.4,
     },
     version: '1.5.1',
@@ -691,7 +691,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 9800,
-      weeklyUsage: 6500,
+      totalConversations: 6500,
       rating: 4.6,
     },
     version: '2.1.3',
@@ -719,7 +719,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 3400,
-      weeklyUsage: 1800,
+      totalConversations: 1800,
       rating: 4.5,
     },
     version: '1.2.4',
@@ -745,7 +745,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 7200,
-      weeklyUsage: 4800,
+      totalConversations: 4800,
       rating: 4.7,
     },
     version: '1.8.0',
@@ -773,7 +773,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 8400,
-      weeklyUsage: 5100,
+      totalConversations: 5100,
       rating: 4.6,
     },
     version: '1.7.2',
@@ -799,7 +799,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 11500,
-      weeklyUsage: 7300,
+      totalConversations: 7300,
       rating: 4.7,
     },
     version: '2.2.0',
@@ -825,7 +825,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 13200,
-      weeklyUsage: 7600,
+      totalConversations: 7600,
       rating: 4.7,
     },
     version: '1.4.0',
@@ -851,7 +851,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 9800,
-      weeklyUsage: 6100,
+      totalConversations: 6100,
       rating: 4.6,
     },
     version: '1.6.2',
@@ -877,7 +877,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 14300,
-      weeklyUsage: 9800,
+      totalConversations: 9800,
       rating: 4.7,
     },
     version: '1.5.1',
@@ -903,7 +903,7 @@ export const mockSkills: Skill[] = [
     },
     stats: {
       installs: 16800,
-      weeklyUsage: 11200,
+      totalConversations: 11200,
       rating: 4.8,
     },
     version: '1.9.0',

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skill } from '@/types/skill';
-import { Heart, Users, MessageCircle, Eye, Sparkles, ExternalLink, ArrowRight } from 'lucide-react';
+import { Heart, Users, MessageCircle, Sparkles, ExternalLink, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -98,17 +98,11 @@ export default function SkillCardNew({ skill, onUseSkill }: SkillCardNewProps) {
                 {skill.category}
               </Badge>
 
-              {/* Stats - Centered in remaining space with responsive sizing */}
-              <div className="flex-1 flex items-center justify-center text-[8px] sm:text-[9px] lg:text-[10px] text-white/85">
-                <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-2.5">
-                  <span className="flex items-center gap-0.5">
-                    <Eye className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-3.5 lg:w-3.5" />
-                    {(skill.stats.installs / 1000).toFixed(1)}k
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    <MessageCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-3.5 lg:w-3.5" />
-                    {(skill.stats.weeklyUsage / 1000).toFixed(0)}k
-                  </span>
+              {/* Stats - Show total conversations with responsive sizing */}
+              <div className="flex-1 flex items-center justify-center text-[10px] sm:text-[11px] lg:text-xs text-white/85">
+                <div className="flex items-center gap-0.5">
+                  <MessageCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-3.5 lg:w-3.5" />
+                  {(skill.stats.totalConversations / 1000).toFixed(1)}k
                 </div>
               </div>
 
@@ -134,15 +128,19 @@ export default function SkillCardNew({ skill, onUseSkill }: SkillCardNewProps) {
           )}>
             <div className="p-4 pt-4">
               {/* Author Info */}
-              <div className="flex items-center gap-1.5 mb-1">
+              <Link
+                href={`/users/${skill.author?.username || 'anonymous'}`}
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1.5 mb-1 group/author hover:opacity-80 transition-opacity w-fit"
+              >
                 <Avatar className="h-4 w-4">
                   <AvatarImage src={skill.author?.avatar} />
                   <AvatarFallback className="text-xs bg-gray-100">
                     {skill.author?.name?.charAt(0) || 'A'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-xs text-gray-600">{skill.author?.name || 'Anonymous'}</span>
-              </div>
+                <span className="text-xs text-gray-600 group-hover/author:text-gray-900">{skill.author?.name || 'Anonymous'}</span>
+              </Link>
 
               {/* Title */}
               <h3 className="font-semibold text-gray-900 mb-1 text-base line-clamp-1">

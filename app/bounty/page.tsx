@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,11 @@ import {
   Palette,
   TrendingUp,
   Star,
-  ArrowRight
+  ArrowRight,
+  Coins,
+  UserPlus,
+  Check,
+  CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -42,6 +46,7 @@ interface BountyTrack {
   submissions: number;
   deadline: Date;
   status: 'active' | 'upcoming' | 'ended';
+  isParticipating: boolean;
   winners?: {
     rank: number;
     name: string;
@@ -56,10 +61,29 @@ export default function BountyPage() {
   const [selectedTrack, setSelectedTrack] = useState<BountyTrack | null>(null);
   const [bountyTracks, setBountyTracks] = useState<BountyTrack[]>([]);
   const [loading, setLoading] = useState(true);
+  const [participatingTracks, setParticipatingTracks] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchBountyTracks();
   }, []);
+
+  const handleParticipate = (trackId: string) => {
+    setBountyTracks(prevTracks =>
+      prevTracks.map(track => {
+        if (track.id === trackId) {
+          const isNowParticipating = !track.isParticipating;
+          return {
+            ...track,
+            isParticipating: isNowParticipating,
+            participants: isNowParticipating
+              ? track.participants + 1
+              : track.participants - 1
+          };
+        }
+        return track;
+      })
+    );
+  };
 
   const fetchBountyTracks = () => {
     setLoading(true);
@@ -76,6 +100,7 @@ export default function BountyPage() {
         submissions: 89,
         deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
         status: 'active',
+        isParticipating: false,
         tags: ['Research', 'AI', 'Academic'],
         winners: undefined
       },
@@ -90,6 +115,7 @@ export default function BountyPage() {
         submissions: 67,
         deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
         status: 'active',
+        isParticipating: false,
         tags: ['Development', 'Automation', 'Code']
       },
       {
@@ -103,6 +129,7 @@ export default function BountyPage() {
         submissions: 45,
         deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
         status: 'active',
+        isParticipating: false,
         tags: ['Creative', 'Content', 'Design']
       },
       {
@@ -116,6 +143,7 @@ export default function BountyPage() {
         submissions: 112,
         deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // Ended 2 days ago
         status: 'ended',
+        isParticipating: false,
         tags: ['Data', 'Analytics', 'Visualization'],
         winners: [
           {
@@ -152,6 +180,7 @@ export default function BountyPage() {
         submissions: 0,
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         status: 'upcoming',
+        isParticipating: false,
         tags: ['Education', 'Learning', 'Students']
       }
     ];
@@ -329,23 +358,33 @@ export default function BountyPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                    {[
+                      { id: 1, name: 'Essay Assistant', slug: 'essay-assistant', author: 'John D.' },
+                      { id: 2, name: 'SQL Optimizer', slug: 'sql-optimizer', author: 'Sarah M.' },
+                      { id: 3, name: 'Literature Review', slug: 'literature-review', author: 'Mike L.' },
+                      { id: 4, name: 'Data Analysis', slug: 'data-analysis', author: 'Emma K.' },
+                      { id: 5, name: 'Creative Writing', slug: 'creative-writing', author: 'Alex P.' }
+                    ].map((submission) => (
+                      <Link
+                        key={submission.id}
+                        href={`/skills/${submission.slug}`}
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
+                      >
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarFallback>U{i}</AvatarFallback>
+                            <AvatarFallback>{submission.author.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">Skill Submission #{i}</p>
+                            <p className="font-medium group-hover:text-primary transition-colors">
+                              {submission.name}
+                            </p>
                             <p className="text-sm text-muted-foreground">
-                              Submitted {i} hours ago
+                              by {submission.author} • Submitted {submission.id} hours ago
                             </p>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm">
-                          <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </Link>
                     ))}
                   </div>
                 </CardContent>
@@ -415,23 +454,31 @@ export default function BountyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white px-6 py-12">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
+    <div className="min-h-screen bg-gray-50">
+      {/* Banner Section */}
+      <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative px-4 lg:px-6 xl:px-8 py-12 text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full">
-              <Gift className="h-8 w-8 text-white" />
+            <div className="p-3 bg-white/20 backdrop-blur rounded-full">
+              <Gift className="h-10 w-10 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Skill Bounties
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <h1 className="text-4xl font-bold text-white mb-3">Skill Bounties</h1>
+          <p className="text-lg text-white/90 max-w-2xl mx-auto">
             Compete in hackathon-style challenges, build innovative skills, and win prizes
           </p>
         </div>
+        {/* Decorative wave - responsive */}
+        <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none">
+          <svg viewBox="0 0 1200 60" preserveAspectRatio="none" className="relative block w-full h-12">
+            <path fill="rgb(249 250 251)" fillOpacity="1" d="M0,30 C400,60 800,0 1200,30 L1200,60 L0,60 Z"></path>
+          </svg>
+        </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="px-4 lg:px-6 xl:px-8 py-8 max-w-7xl mx-auto">
         {/* Total Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="p-4">
@@ -543,6 +590,30 @@ export default function BountyPage() {
                           </Badge>
                         ))}
                       </div>
+                      <Button
+                        className={cn(
+                          "w-full mt-4 transition-all",
+                          track.isParticipating
+                            ? "bg-green-600 hover:bg-green-700 text-white"
+                            : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleParticipate(track.id);
+                        }}
+                      >
+                        {track.isParticipating ? (
+                          <>
+                            <Check className="h-4 w-4 mr-2" />
+                            Participating
+                          </>
+                        ) : (
+                          <>
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Participate
+                          </>
+                        )}
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
@@ -654,7 +725,3 @@ export default function BountyPage() {
     </div>
   );
 }
-
-// Add missing import
-import { CheckCircle } from 'lucide-react';
-import React from 'react';
