@@ -158,9 +158,13 @@ export default function CreateSkillPage() {
 
       if (response.ok) {
         const result = await response.json();
+
+        // Signal that skills have been updated
+        localStorage.setItem('skillsUpdated', 'true');
+
         toast({
           title: 'Success!',
-          description: 'Your skill has been created successfully.',
+          description: 'Your skill has been created and automatically installed.',
         });
         router.push('/my-skills?tab=uploaded');
       } else {

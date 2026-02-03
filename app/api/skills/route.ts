@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { mockSkills } from '@/data/mockSkills';
+import { mockSkills, mockInstalledSkills, mockUploadedSkills } from '@/data/mockSkills';
 import { Skill } from '@/types/skill';
 
 export async function GET(request: Request) {
@@ -112,11 +112,41 @@ export async function POST(request: Request) {
       examples: body.examples || [],
     };
 
-    // In a real app, you would save this to a database
-    // For now, we just return the created skill
+    // Add the new skill to the beginning of mockSkills array so it appears first
+    mockSkills.unshift(newSkill);
+
+    // Automatically install and enable the skill for the creator
+    const installedSkill = {
+      skillId: newSkill.id,
+      installedAt: new Date().toISOString(),
+      lastUsed: new Date().toISOString(),
+      isEnabled: true,
+      usageCount: 0,
+    };
+
+    // Add to installed skills (in a real app, this would be user-specific)
+    mockInstalledSkills.unshift(installedSkill);
+
+    // Also add to uploaded skills for the creator
+    const uploadedSkill = {
+      ...newSkill,
+      status: 'published' as const,
+      publishedAt: new Date().toISOString(),
+      totalInstalls: 0,
+      totalUsage: 0,
+      weeklyActiveUsers: 0,
+    };
+    mockUploadedSkills.unshift(uploadedSkill);
+
+    // Signal that skills have been updated
+    // This will trigger refresh in other pages via localStorage
+    if (typeof window !== 'undefined') {
+      localStorage?.setItem('skillsUpdated', 'true');
+    }
+
     return NextResponse.json({
       skill: newSkill,
-      message: 'Skill created successfully',
+      message: 'Skill created successfully and automatically installed',
     }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
