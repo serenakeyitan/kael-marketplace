@@ -41,14 +41,14 @@ interface UserProfile {
 
 const skillCategories = [
   'All',
-  'Career',
-  'Health',
-  'Academic',
-  'Business',
-  'Programming',
-  'Marketing',
-  'Image',
-  'Prompt'
+  'productivity',
+  'creative',
+  'development',
+  'research',
+  'communication',
+  'education',
+  'entertainment',
+  'other'
 ];
 
 export default function UserProfilePage() {
@@ -69,181 +69,16 @@ export default function UserProfilePage() {
   const fetchUserProfile = async () => {
     setLoading(true);
     try {
-      // Simulate API call - In production, this would fetch real user data
-      const mockProfile: UserProfile = {
-        id: '1',
-        username: username,
-        name: username === 'the-glitch' ? 'The Glitch' : username.replace(/-/g, ' '),
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-        description: 'Independent researcher on AI skills and prompt engineering. Building the future of automation.',
-        followers: 626,
-        following: 2,
-        totalUsers: 2300000,
-        popularity: 5000000,
-        isFollowing: false,
-        skills: []
-      };
+      const response = await fetch(`/api/users/${username}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
 
-      // Mock skills data
-      const mockSkills = [
-        {
-          id: '1',
-          name: 'NarutorPG',
-          slug: 'narutorpg',
-          shortDescription: 'You can play RPG-style adventures set in the Naruto universe',
-          longDescription: '',
-          category: 'Academic',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 13000,
-            totalConversations: 0,
-            rating: 4.8
-          }
-        },
-        {
-          id: '2',
-          name: 'R.Em GPT Unblocker',
-          slug: 'rem-gpt-unblocker',
-          shortDescription: 'Unlock all the potential hidden in GPT. It is R.Em 1.0 - GPT with no rules',
-          longDescription: '',
-          category: 'Programming',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 228700,
-            totalConversations: 0,
-            rating: 4.9
-          }
-        },
-        {
-          id: '3',
-          name: 'Dungeons & Dragons Assistant',
-          slug: 'creative-writing',
-          shortDescription: 'This prompt will immerse you in a detailed DnD adventure',
-          longDescription: '',
-          category: 'Business',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 189000,
-            totalConversations: 0,
-            rating: 4.7
-          }
-        },
-        {
-          id: '4',
-          name: 'EssayGPT',
-          slug: 'essay-gpt',
-          shortDescription: 'This prompt will help you with your academic writing and essays',
-          longDescription: '',
-          category: 'Academic',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 591900,
-            totalConversations: 0,
-            rating: 4.6
-          }
-        },
-        {
-          id: '5',
-          name: 'Any Prompt Generator',
-          slug: 'any-prompt-generator',
-          shortDescription: 'This prompt generates any kind of prompt that is realistic',
-          longDescription: '',
-          category: 'Prompt',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 169000,
-            totalConversations: 0,
-            rating: 4.5
-          }
-        },
-        {
-          id: '6',
-          name: 'Jiraiya - Toad Sage Training',
-          slug: 'jiraiya-training',
-          shortDescription: 'You can use this prompt to be trained directly by Jiraiya',
-          longDescription: '',
-          category: 'Academic',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 201800,
-            totalConversations: 0,
-            rating: 4.9
-          }
-        },
-        {
-          id: '7',
-          name: 'Dragon Ball GPT - A What If Adventure',
-          slug: 'dragon-ball-gpt',
-          shortDescription: 'A What If adventure. You are now Akira, a saiyan born on Planet Vegeta',
-          longDescription: '',
-          category: 'Marketing',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 50400,
-            totalConversations: 0,
-            rating: 4.7
-          }
-        },
-        {
-          id: '8',
-          name: 'PokedexGPT',
-          slug: 'pokedex-gpt',
-          shortDescription: 'This works as a pokedex: you can enter any name or descriptor of a pokemon',
-          longDescription: '',
-          category: 'Image',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 87900,
-            totalConversations: 0,
-            rating: 4.8
-          }
-        }
-      ];
-
-      mockProfile.skills = mockSkills as Skill[];
-      setProfile(mockProfile);
-      setIsFollowing(mockProfile.isFollowing);
+      const data = await response.json();
+      setProfile(data.profile);
+      setIsFollowing(data.profile.isFollowing);
     } catch (error) {
+      console.error('Error fetching user profile:', error);
       toast({
         title: 'Error',
         description: 'Failed to load user profile',
