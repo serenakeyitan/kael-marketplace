@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { mockInstalledSkills, mockSkills } from '@/data/mockSkills';
 
-// In-memory storage for demo purposes
-let installedSkills = [...mockInstalledSkills];
+export const dynamic = 'force-dynamic'; // Disable caching
+
+// Use the original arrays directly (for demo purposes)
 
 export async function GET() {
   // Get full skill details for installed skills
-  const installedWithDetails = installedSkills.map(installed => {
+  const installedWithDetails = mockInstalledSkills.map(installed => {
     const skill = mockSkills.find(s => s.id === installed.skillId);
     return {
       ...installed,
@@ -18,7 +19,7 @@ export async function GET() {
   await new Promise(resolve => setTimeout(resolve, 100));
 
   return NextResponse.json({
-    installedSkills: installedWithDetails,
+    mockInstalledSkills: installedWithDetails,
     total: installedWithDetails.length,
   });
 }
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     // Check if already installed
-    const existingInstall = installedSkills.find(i => i.skillId === skillId);
+    const existingInstall = mockInstalledSkills.find(i => i.skillId === skillId);
     if (existingInstall) {
       return NextResponse.json(
         { error: 'Skill already installed' },
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
       usageCount: 0,
     };
 
-    installedSkills.push(newInstall);
+    mockInstalledSkills.push(newInstall);
 
     return NextResponse.json({
       installed: newInstall,
@@ -89,15 +90,17 @@ export async function DELETE(request: Request) {
     }
 
     // Remove from installed skills
-    const initialLength = installedSkills.length;
-    installedSkills = installedSkills.filter(i => i.skillId !== skillId);
+    const initialLength = mockInstalledSkills.length;
+    const indexToRemove = mockInstalledSkills.findIndex(i => i.skillId === skillId);
 
-    if (installedSkills.length === initialLength) {
+    if (indexToRemove === -1) {
       return NextResponse.json(
         { error: 'Skill not found in installed skills' },
         { status: 404 }
       );
     }
+
+    mockInstalledSkills.splice(indexToRemove, 1);
 
     return NextResponse.json({
       message: 'Skill uninstalled successfully',
@@ -125,15 +128,16 @@ export async function PATCH(request: Request) {
     // Handle uninstall action
     if (action === 'uninstall') {
       // Remove from installed skills
-      const initialLength = installedSkills.length;
-      installedSkills = installedSkills.filter(i => i.skillId !== skillId);
+      const indexToRemove = mockInstalledSkills.findIndex(i => i.skillId === skillId);
 
-      if (installedSkills.length === initialLength) {
+      if (indexToRemove === -1) {
         return NextResponse.json(
           { error: 'Skill not found in installed skills' },
           { status: 404 }
         );
       }
+
+      mockInstalledSkills.splice(indexToRemove, 1);
 
       return NextResponse.json({
         message: 'Skill uninstalled successfully',
@@ -141,7 +145,7 @@ export async function PATCH(request: Request) {
     }
 
     // Handle enable/disable
-    const installedSkill = installedSkills.find(i => i.skillId === skillId);
+    const installedSkill = mockInstalledSkills.find(i => i.skillId === skillId);
     if (!installedSkill) {
       return NextResponse.json(
         { error: 'Skill not found in installed skills' },

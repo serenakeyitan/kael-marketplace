@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { mockSkills, mockInstalledSkills, mockUploadedSkills } from '@/data/mockSkills';
 import { Skill } from '@/types/skill';
 
+export const dynamic = 'force-dynamic'; // Disable caching
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 

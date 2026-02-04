@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
 import { mockUploadedSkills } from '@/data/mockSkills';
 
-// In-memory storage for demo purposes
-let uploadedSkills = [...mockUploadedSkills];
+export const dynamic = 'force-dynamic'; // Disable caching
+
+// Use the original array directly (for demo purposes)
 
 export async function GET() {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 100));
 
   return NextResponse.json({
-    uploadedSkills,
-    total: uploadedSkills.length,
+    mockUploadedSkills,
+    total: mockUploadedSkills.length,
   });
 }
 
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
       weeklyActiveUsers: 0,
     };
 
-    uploadedSkills.push(newSkill);
+    mockUploadedSkills.push(newSkill);
 
     return NextResponse.json({
       skill: newSkill,
@@ -72,7 +73,7 @@ export async function PATCH(request: Request) {
     }
 
     // Find and update uploaded skill
-    const skill = uploadedSkills.find(s => s.id === skillId);
+    const skill = mockUploadedSkills.find(s => s.id === skillId);
     if (!skill) {
       return NextResponse.json(
         { error: 'Skill not found' },

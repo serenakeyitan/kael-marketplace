@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -52,6 +52,8 @@ import {
   CheckCircle,
   Loader2,
   Info,
+  Trophy,
+  Gift,
 } from 'lucide-react';
 
 const categories: SkillCategory[] = [
@@ -113,6 +115,7 @@ const formSchema = z.object({
   demoPrompt: z.string().min(10, 'Demo prompt must be at least 10 characters'),
   examples: z.array(z.string()).min(1, 'Add at least one example').max(5, 'Add up to 5 examples'),
   version: z.string().regex(/^\d+\.\d+\.\d+$/, 'Version must be in format X.Y.Z'),
+  bountyId: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
