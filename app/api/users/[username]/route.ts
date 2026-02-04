@@ -164,7 +164,7 @@ export async function GET(
   } catch (error) {
     console.error('Error in user profile GET:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch user profile' },
+      { error: 'Failed to fetch user profile', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

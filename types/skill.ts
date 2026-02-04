@@ -64,6 +64,7 @@ export interface Skill {
   features?: string[];
   requirements?: string[];
   icon?: string;
+  githubUrl?: string;
 }
 
 export interface InstalledSkill {

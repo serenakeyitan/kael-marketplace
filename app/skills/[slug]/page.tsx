@@ -823,6 +823,19 @@ export default function SkillDetailPage() {
                   </>
                 )}
               </Button>
+              {skill.githubUrl && (
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                  asChild
+                >
+                  <a href={skill.githubUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="mr-2 h-5 w-5" />
+                    View on GitHub
+                  </a>
+                </Button>
+              )}
               <Button
                 size="lg"
                 variant="ghost"
@@ -1070,7 +1083,12 @@ export default function SkillDetailPage() {
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">{review.userName}</span>
+                            <Link
+                              href={`/users/${review.userName.toLowerCase().replace(/\s+/g, '-')}`}
+                              className="font-medium text-sm hover:underline"
+                            >
+                              {review.userName}
+                            </Link>
                             {review.isRecommended && (
                               <Badge variant="secondary" className="text-xs">
                                 <ThumbsUp className="h-3 w-3 mr-1" />
@@ -1195,7 +1213,12 @@ export default function SkillDetailPage() {
                                     </Avatar>
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
-                                        <span className="font-medium text-xs">{reply.userName}</span>
+                                        <Link
+                                          href={`/users/${reply.userName.toLowerCase().replace(/\s+/g, '-')}`}
+                                          className="font-medium text-xs hover:underline"
+                                        >
+                                          {reply.userName}
+                                        </Link>
                                         <span className="text-xs text-muted-foreground">
                                           {formatDistanceToNow(reply.timestamp, { addSuffix: true })}
                                         </span>

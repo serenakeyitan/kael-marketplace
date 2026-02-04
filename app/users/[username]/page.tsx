@@ -70,15 +70,24 @@ export default function UserProfilePage() {
     setLoading(true);
     try {
       const response = await fetch(`/api/users/${username}`);
+
       if (!response.ok) {
-        throw new Error('Failed to fetch user profile');
+        console.error('Failed to fetch user profile:', response.status);
+        setProfile(null);
+        return;
       }
 
       const data = await response.json();
-      setProfile(data.profile);
-      setIsFollowing(data.profile.isFollowing);
+
+      if (data.profile) {
+        setProfile(data.profile);
+        setIsFollowing(data.profile.isFollowing || false);
+      } else {
+        setProfile(null);
+      }
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      setProfile(null);
       toast({
         title: 'Error',
         description: 'Failed to load user profile',
@@ -150,7 +159,7 @@ export default function UserProfilePage() {
             <Avatar className="h-24 w-24 border-4 border-gray-100">
               <AvatarImage src={profile.avatar} />
               <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                {profile.name.charAt(0)}
+                {profile.name ? profile.name.charAt(0) : profile.username?.charAt(0) || '?'}
               </AvatarFallback>
             </Avatar>
 
