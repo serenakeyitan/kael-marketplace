@@ -672,10 +672,9 @@ export default function SkillDetailPage() {
     );
   }
 
-  // Calculate average rating
-  const averageRating = reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : skill.stats.rating || 0;
+  // Use rating from database (skill.stats contains the actual database values)
+  const averageRating = skill.stats.rating || 0;
+  const totalRatings = skill.stats.totalRatings || 0;
 
   // Generate gradient based on skill category
   const gradientColors = {
@@ -781,7 +780,7 @@ export default function SkillDetailPage() {
                 <div className="flex items-center gap-2">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="font-semibold">{averageRating.toFixed(1)}</span>
-                  <span className="text-sm text-white/70">({reviews.length} reviews)</span>
+                  <span className="text-sm text-white/70">({totalRatings} reviews)</span>
                 </div>
               </div>
             </div>
@@ -950,7 +949,7 @@ export default function SkillDetailPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Star className="h-5 w-5" />
-                    Reviews ({reviews.length})
+                    Reviews ({totalRatings})
                   </CardTitle>
                   <div className="text-2xl font-bold flex items-center gap-1">
                     {averageRating.toFixed(1)}
