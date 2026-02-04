@@ -9,14 +9,10 @@ import {
   Trophy,
   Gift,
   Plus,
-  Settings,
-  LogOut,
   User,
   Sparkles,
-  TrendingUp,
   Clock,
   Heart,
-  ExternalLink,
   ArrowUpRight,
   Upload,
   Code2,
@@ -26,7 +22,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { SignedIn, SignedOut, UserButton } from '@daveyplate/better-auth-ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -55,7 +51,7 @@ const navigation = [
 export default function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isCreator } = useAuth();
+  const { isCreator } = useAuth();
   const { toast } = useToast();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -284,25 +280,26 @@ export default function Sidebar({ className }: SidebarProps) {
 
       {/* User Section */}
       <div className="p-3 border-t bg-white">
-        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.avatar} />
-            <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-              {user?.name?.charAt(0) || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.name || 'User'}</p>
-            <p className="text-xs text-gray-500 truncate">{user?.email || 'user@example.com'}</p>
-          </div>
-          <Button
+        <SignedIn>
+          <UserButton
+            size="default"
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700"
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
-        </div>
+            className="w-full justify-between rounded-lg hover:bg-gray-50"
+            align="start"
+            side="top"
+            sideOffset={8}
+          />
+        </SignedIn>
+        <SignedOut>
+          <Link href="/auth/sign-in" className="block">
+            <Button
+              variant="ghost"
+              className="w-full justify-between rounded-lg hover:bg-gray-50"
+            >
+              <span className="text-sm font-medium">Sign in</span>
+            </Button>
+          </Link>
+        </SignedOut>
       </div>
 
       {/* Create Skill Dialog */}
