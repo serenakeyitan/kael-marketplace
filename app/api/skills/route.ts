@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { mockSkills, mockInstalledSkills, mockUploadedSkills } from '@/data/mockSkills';
-import { Skill, AudienceTag } from '@/types/skill';
+import { supabase } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic'; // Disable caching
 
@@ -14,66 +13,103 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '12');
 
-  // Filter skills
-  let filteredSkills = [...mockSkills];
+  try {
+    // Start building the query
+    let query = supabase
+      .from('skills')
+      .select('*', { count: 'exact' })
+      .eq('is_published', true);
 
-  // Search filter
-  if (search) {
-    const searchLower = search.toLowerCase();
-    filteredSkills = filteredSkills.filter(
-      skill =>
-        skill.name.toLowerCase().includes(searchLower) ||
-        skill.shortDescription.toLowerCase().includes(searchLower) ||
-        skill.longDescription.toLowerCase().includes(searchLower) ||
-        skill.audienceTags.some(tag => tag.toLowerCase().includes(searchLower))
-    );
-  }
+    // Search filter - search in name, description, and tags
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+    }
 
-  // Category filter
-  if (category && category !== 'all') {
-    filteredSkills = filteredSkills.filter(skill => skill.category === category);
-  }
+    // Category filter
+    if (category && category !== 'all') {
+      query = query.eq('category', category);
+    }
 
-  // Audience tags filter
-  if (tags.length > 0) {
-    filteredSkills = filteredSkills.filter(skill =>
-      tags.some(tag => skill.audienceTags.includes(tag as AudienceTag))
-    );
-  }
+    // Tags filter - check if any of the requested tags are in the skill's tags array
+    if (tags.length > 0) {
+      query = query.contains('tags', tags);
+    }
 
-  // Sort
-  switch (sort) {
-    case 'popular':
-      filteredSkills.sort((a, b) => b.stats.totalConversations - a.stats.totalConversations);
-      break;
-    case 'new':
-      filteredSkills.sort((a, b) =>
-        new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+    // Sorting
+    switch (sort) {
+      case 'popular':
+        query = query.order('installs', { ascending: false });
+        break;
+      case 'new':
+        query = query.order('created_at', { ascending: false });
+        break;
+      case 'usage':
+        query = query.order('conversations', { ascending: false });
+        break;
+      case 'rating':
+        query = query.order('rating', { ascending: false });
+        break;
+      default:
+        query = query.order('installs', { ascending: false });
+    }
+
+    // Pagination
+    const startIndex = (page - 1) * limit;
+    query = query.range(startIndex, startIndex + limit - 1);
+
+    // Execute query
+    const { data: skills, error, count } = await query;
+
+    if (error) {
+      console.error('Error fetching skills:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch skills' },
+        { status: 500 }
       );
-      break;
-    case 'usage':
-      filteredSkills.sort((a, b) => b.stats.totalConversations - a.stats.totalConversations);
-      break;
-    case 'rating':
-      filteredSkills.sort((a, b) => (b.stats.rating || 0) - (a.stats.rating || 0));
-      break;
+    }
+
+    // Transform skills to match frontend format
+    const transformedSkills = skills?.map(skill => ({
+      id: skill.id,
+      slug: skill.slug,
+      name: skill.name,
+      shortDescription: skill.description,
+      longDescription: skill.documentation || skill.description,
+      category: skill.category,
+      audienceTags: skill.tags || [],
+      author: {
+        name: skill.author_name,
+        username: skill.author_username,
+        avatar: skill.author_avatar,
+        isOfficial: false,
+      },
+      stats: {
+        installs: skill.installs || 0,
+        totalConversations: skill.conversations || 0,
+        rating: skill.rating || 0,
+        totalRatings: skill.total_ratings || 0,
+        weeklyActiveUsers: skill.weekly_active_users || 0,
+      },
+      version: '1.0.0', // We don't have version in DB yet
+      lastUpdated: skill.updated_at || skill.created_at,
+      githubUrl: skill.github_url,
+      icon: skill.icon,
+    })) || [];
+
+    return NextResponse.json({
+      skills: transformedSkills,
+      total: count || 0,
+      page,
+      limit,
+      totalPages: Math.ceil((count || 0) / limit),
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json(
+      { error: 'An unexpected error occurred' },
+      { status: 500 }
+    );
   }
-
-  // Pagination
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + limit;
-  const paginatedSkills = filteredSkills.slice(startIndex, endIndex);
-
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 100));
-
-  return NextResponse.json({
-    skills: paginatedSkills,
-    total: filteredSkills.length,
-    page,
-    limit,
-    totalPages: Math.ceil(filteredSkills.length / limit),
-  });
 }
 
 export async function POST(request: Request) {
@@ -81,7 +117,7 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Validate required fields
-    const requiredFields = ['name', 'slug', 'shortDescription', 'longDescription', 'category', 'audienceTags'];
+    const requiredFields = ['name', 'slug', 'shortDescription', 'category', 'audienceTags'];
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -91,65 +127,97 @@ export async function POST(request: Request) {
       }
     }
 
-    // Create new skill
-    const newSkill: Skill & { bountyId?: string } = {
-      id: Date.now().toString(),
-      slug: body.slug,
-      name: body.name,
-      shortDescription: body.shortDescription,
-      longDescription: body.longDescription,
-      category: body.category,
-      audienceTags: body.audienceTags,
+    // Check if slug already exists
+    const { data: existingSkill } = await supabase
+      .from('skills')
+      .select('id')
+      .eq('slug', body.slug)
+      .single();
+
+    if (existingSkill) {
+      return NextResponse.json(
+        { error: 'A skill with this slug already exists' },
+        { status: 409 }
+      );
+    }
+
+    // Create new skill in database
+    const { data: newSkill, error } = await supabase
+      .from('skills')
+      .insert({
+        slug: body.slug,
+        name: body.name,
+        description: body.shortDescription,
+        documentation: body.longDescription || body.shortDescription,
+        category: body.category,
+        tags: body.audienceTags,
+        // For now, use placeholder author data
+        // This will be replaced with actual user data from Better Auth
+        author_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', // Placeholder user ID
+        author_name: body.authorName || 'Current User',
+        author_username: body.authorUsername || 'currentuser',
+        author_avatar: body.authorAvatar || null,
+        github_url: body.githubUrl || null,
+        icon: body.icon || null,
+        is_published: true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating skill:', error);
+      return NextResponse.json(
+        { error: 'Failed to create skill' },
+        { status: 500 }
+      );
+    }
+
+    // Transform the response to match frontend format
+    const transformedSkill = {
+      id: newSkill.id,
+      slug: newSkill.slug,
+      name: newSkill.name,
+      shortDescription: newSkill.description,
+      longDescription: newSkill.documentation,
+      category: newSkill.category,
+      audienceTags: newSkill.tags,
       author: {
-        name: body.authorName || 'Current User',
+        name: newSkill.author_name,
+        username: newSkill.author_username,
+        avatar: newSkill.author_avatar,
         isOfficial: false,
       },
       stats: {
         installs: 0,
         totalConversations: 0,
+        rating: 0,
+        totalRatings: 0,
+        weeklyActiveUsers: 0,
       },
-      version: body.version || '1.0.0',
-      lastUpdated: new Date().toISOString().split('T')[0],
-      demoPrompt: body.demoPrompt || '',
-      examples: body.examples || [],
-      // Store bounty ID if participating
-      ...(body.bountyId && { bountyId: body.bountyId }),
+      version: '1.0.0',
+      lastUpdated: newSkill.created_at,
+      githubUrl: newSkill.github_url,
+      icon: newSkill.icon,
     };
 
-    // Add the new skill to the beginning of mockSkills array so it appears first
-    mockSkills.unshift(newSkill);
-
-    // Automatically install and enable the skill for the creator
-    const installedSkill = {
-      skillId: newSkill.id,
-      installedAt: new Date().toISOString(),
-      lastUsed: new Date().toISOString(),
-      isEnabled: true,
-      usageCount: 0,
-    };
-
-    // Add to installed skills (in a real app, this would be user-specific)
-    mockInstalledSkills.unshift(installedSkill);
-
-    // Also add to uploaded skills for the creator
-    const uploadedSkill = {
-      ...newSkill,
-      status: 'published' as const,
-      publishedAt: new Date().toISOString(),
-      totalInstalls: 0,
-      totalUsage: 0,
-      weeklyActiveUsers: 0,
-    };
-    mockUploadedSkills.unshift(uploadedSkill);
-
-    // Note: localStorage cannot be accessed server-side
-    // The client will handle setting the flag after successful creation
+    // If user is logged in, also install the skill for them
+    // This will be implemented when we integrate Better Auth
+    if (body.autoInstall && body.userId) {
+      await supabase
+        .from('installed_skills')
+        .insert({
+          user_id: body.userId,
+          skill_id: newSkill.id,
+          enabled: true,
+        });
+    }
 
     return NextResponse.json({
-      skill: newSkill,
-      message: 'Skill created successfully and automatically installed',
+      skill: transformedSkill,
+      message: 'Skill created successfully',
     }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error('Unexpected error:', error);
     return NextResponse.json(
       { error: 'Failed to create skill' },
       { status: 500 }
