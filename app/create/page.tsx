@@ -122,11 +122,18 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function CreateSkillPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentExample, setCurrentExample] = useState('');
   const [currentTab, setCurrentTab] = useState('basic');
+  const [participateInBounty, setParticipateInBounty] = useState(false);
+  const [selectedBounty, setSelectedBounty] = useState<string>('');
+
+  // Get bounty info from URL params if coming from bounty page
+  const bountyIdFromUrl = searchParams.get('bountyId');
+  const bountyNameFromUrl = searchParams.get('bountyName');
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -140,8 +147,18 @@ export default function CreateSkillPage() {
       demoPrompt: '',
       examples: [],
       version: '1.0.0',
+      bountyId: bountyIdFromUrl || undefined,
     },
   });
+
+  // Set bounty participation if coming from bounty page
+  useEffect(() => {
+    if (bountyIdFromUrl) {
+      setParticipateInBounty(true);
+      setSelectedBounty(bountyIdFromUrl);
+      form.setValue('bountyId', bountyIdFromUrl);
+    }
+  }, [bountyIdFromUrl, form]);
 
   const generateSlug = (name: string) => {
     return name
@@ -153,10 +170,16 @@ export default function CreateSkillPage() {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
+      const skillData = {
+        ...data,
+        // Include bounty ID only if participating
+        bountyId: participateInBounty ? data.bountyId : undefined,
+      };
+
       const response = await fetch('/api/skills', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(skillData),
       });
 
       if (response.ok) {
@@ -165,9 +188,13 @@ export default function CreateSkillPage() {
         // Signal that skills have been updated
         localStorage.setItem('skillsUpdated', 'true');
 
+        const successMessage = participateInBounty && data.bountyId
+          ? 'Your skill has been created and entered into the bounty competition!'
+          : 'Your skill has been created and automatically installed.';
+
         toast({
           title: 'Success!',
-          description: 'Your skill has been created and automatically installed.',
+          description: successMessage,
         });
         router.push('/my-skills?tab=uploaded');
       } else {
@@ -341,12 +368,93 @@ export default function CreateSkillPage() {
                           </SelectContent>
                         </Select>
                         <FormDescription>
-                          Choose the category that best fits your skill
+                          Choose the category that best fits your skill (required)
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  {/* Bounty Participation Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="participate-bounty"
+                        checked={participateInBounty}
+                        onChange={(e) => {
+                          setParticipateInBounty(e.target.checked);
+                          if (!e.target.checked) {
+                            setSelectedBounty('');
+                            form.setValue('bountyId', undefined);
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="participate-bounty" className="flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-yellow-600" />
+                        Participate in Bounty Program
+                      </Label>
+                    </div>
+
+                    {participateInBounty && (
+                      <div className="pl-6 space-y-2">
+                        <FormField
+                          control={form.control}
+                          name="bountyId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Select Bounty Track</FormLabel>
+                              <Select
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  setSelectedBounty(value);
+                                }}
+                                value={field.value || selectedBounty}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Choose a bounty track" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="1">
+                                    <div className="flex items-center gap-2">
+                                      <Trophy className="h-4 w-4 text-purple-500" />
+                                      AI Research Assistant - $5000
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="2">
+                                    <div className="flex items-center gap-2">
+                                      <Trophy className="h-4 w-4 text-blue-500" />
+                                      Code Generation Challenge - $4000
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="3">
+                                    <div className="flex items-center gap-2">
+                                      <Trophy className="h-4 w-4 text-pink-500" />
+                                      Creative Content Tools - $3500
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                {bountyNameFromUrl ? (
+                                  <span className="text-green-600 flex items-center gap-1">
+                                    <CheckCircle className="h-3 w-3" />
+                                    Pre-selected: {bountyNameFromUrl}
+                                  </span>
+                                ) : (
+                                  'Your skill will be entered into the selected bounty competition'
+                                )}
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
+                  </div>
 
                   <FormField
                     control={form.control}

@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     }
 
     // Create new skill
-    const newSkill: Skill = {
+    const newSkill: Skill & { bountyId?: string } = {
       id: Date.now().toString(),
       slug: body.slug,
       name: body.name,
@@ -112,6 +112,8 @@ export async function POST(request: Request) {
       lastUpdated: new Date().toISOString().split('T')[0],
       demoPrompt: body.demoPrompt || '',
       examples: body.examples || [],
+      // Store bounty ID if participating
+      ...(body.bountyId && { bountyId: body.bountyId }),
     };
 
     // Add the new skill to the beginning of mockSkills array so it appears first

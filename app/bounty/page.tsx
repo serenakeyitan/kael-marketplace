@@ -27,8 +27,6 @@ import {
   Star,
   ArrowRight,
   Coins,
-  UserPlus,
-  Check,
   CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
@@ -46,7 +44,6 @@ interface BountyTrack {
   submissions: number;
   deadline: Date;
   status: 'active' | 'upcoming' | 'ended';
-  isParticipating: boolean;
   winners?: {
     rank: number;
     name: string;
@@ -61,29 +58,10 @@ export default function BountyPage() {
   const [selectedTrack, setSelectedTrack] = useState<BountyTrack | null>(null);
   const [bountyTracks, setBountyTracks] = useState<BountyTrack[]>([]);
   const [loading, setLoading] = useState(true);
-  const [participatingTracks, setParticipatingTracks] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchBountyTracks();
   }, []);
-
-  const handleParticipate = (trackId: string) => {
-    setBountyTracks(prevTracks =>
-      prevTracks.map(track => {
-        if (track.id === trackId) {
-          const isNowParticipating = !track.isParticipating;
-          return {
-            ...track,
-            isParticipating: isNowParticipating,
-            participants: isNowParticipating
-              ? track.participants + 1
-              : track.participants - 1
-          };
-        }
-        return track;
-      })
-    );
-  };
 
   const fetchBountyTracks = () => {
     setLoading(true);
@@ -100,7 +78,6 @@ export default function BountyPage() {
         submissions: 89,
         deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
         status: 'active',
-        isParticipating: false,
         tags: ['Research', 'AI', 'Academic'],
         winners: undefined
       },
@@ -115,7 +92,6 @@ export default function BountyPage() {
         submissions: 67,
         deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
         status: 'active',
-        isParticipating: false,
         tags: ['Development', 'Automation', 'Code']
       },
       {
@@ -129,7 +105,6 @@ export default function BountyPage() {
         submissions: 45,
         deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
         status: 'active',
-        isParticipating: false,
         tags: ['Creative', 'Content', 'Design']
       },
       {
@@ -143,7 +118,6 @@ export default function BountyPage() {
         submissions: 112,
         deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // Ended 2 days ago
         status: 'ended',
-        isParticipating: false,
         tags: ['Data', 'Analytics', 'Visualization'],
         winners: [
           {
@@ -180,7 +154,6 @@ export default function BountyPage() {
         submissions: 0,
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         status: 'upcoming',
-        isParticipating: false,
         tags: ['Education', 'Learning', 'Students']
       }
     ];
@@ -331,7 +304,7 @@ export default function BountyPage() {
                       <div>
                         <h4 className="font-medium mb-1">Submit Your Entry</h4>
                         <p className="text-sm text-muted-foreground">
-                          Upload your skill and provide documentation before the deadline
+                          Click "Create Skill for This Bounty" to submit your entry with bounty participation
                         </p>
                       </div>
                     </div>
@@ -439,10 +412,10 @@ export default function BountyPage() {
 
               {/* Submit Button */}
               {selectedTrack.status === 'active' && (
-                <Link href="/create">
+                <Link href={`/create?bountyId=${selectedTrack.id}&bountyName=${encodeURIComponent(selectedTrack.title)}`}>
                   <Button className="w-full" size="lg">
                     <Rocket className="h-5 w-5 mr-2" />
-                    Submit Your Skill
+                    Create Skill for This Bounty
                   </Button>
                 </Link>
               )}
@@ -591,28 +564,16 @@ export default function BountyPage() {
                         ))}
                       </div>
                       <Button
-                        className={cn(
-                          "w-full mt-4 transition-all",
-                          track.isParticipating
-                            ? "bg-green-600 hover:bg-green-700 text-white"
-                            : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                        )}
+                        className="w-full mt-4"
+                        variant="outline"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleParticipate(track.id);
+                          // Navigate to selected track to see details
+                          setSelectedTrack(track);
                         }}
                       >
-                        {track.isParticipating ? (
-                          <>
-                            <Check className="h-4 w-4 mr-2" />
-                            Participating
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Participate
-                          </>
-                        )}
+                        View Details & Submit
+                        <ChevronRight className="h-4 w-4 ml-2" />
                       </Button>
                     </CardContent>
                   </Card>
