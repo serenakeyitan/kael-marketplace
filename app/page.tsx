@@ -29,16 +29,17 @@ import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-const useCaseCategories: SkillCategory[] = [
-  'Career',
-  'Health',
-  'Academic',
-  'Business',
-  'Programming',
-  'Marketing',
-  'Image',
-  'Prompt',
-];
+// Categories that match what's actually in the database
+const useCaseCategories = [
+  'productivity',
+  'creative',
+  'development',
+  'research',
+  'communication',
+  'education',
+  'entertainment',
+  'other',
+] as const;
 
 const categories = ['For you', ...useCaseCategories] as const;
 type CategoryFilter = (typeof categories)[number];
