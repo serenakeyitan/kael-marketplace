@@ -104,15 +104,14 @@ export default function SkillDetailPage() {
 
   useEffect(() => {
     fetchSkillDetails();
-    checkInstallStatus();
     fetchReviews();
-    checkLikeStatus();
   }, [params.slug]);
 
-  // Re-check install status when skill is loaded
+  // Check install and like status when skill is loaded
   useEffect(() => {
-    if (skill) {
+    if (skill && skill.id) {
       checkInstallStatus();
+      checkLikeStatus();
     }
   }, [skill]);
 
@@ -289,23 +288,30 @@ export default function SkillDetailPage() {
   const checkInstallStatus = async () => {
     try {
       const response = await fetch('/api/me/installed');
+      if (!response.ok) {
+        console.error('Failed to fetch installed skills:', response.status);
+        return;
+      }
       const data = await response.json();
-      // Check both by slug and by ID to be safe
-      const installed = data.installedSkills.some((item: any) =>
-        item.skill?.slug === params.slug || item.skill?.id === skill?.id
-      );
-      setIsInstalled(installed);
+      if (data.installedSkills && Array.isArray(data.installedSkills)) {
+        // Check both by slug and by ID to be safe
+        const installed = data.installedSkills.some((item: any) =>
+          item.skill?.slug === params.slug || (skill?.id && item.skill?.id === skill.id)
+        );
+        setIsInstalled(installed);
+      }
     } catch (error) {
-      console.error('Failed to check install status');
+      console.error('Failed to check install status:', error);
     }
   };
 
   const checkLikeStatus = () => {
-    // Check if skill is liked (mock implementation)
+    // Check if skill is liked
+    if (!skill) return;
     const likedSkills = localStorage.getItem('likedSkills');
     if (likedSkills) {
       const liked = JSON.parse(likedSkills);
-      setIsLiked(liked.includes(params.slug));
+      setIsLiked(liked.includes(skill.id));
     }
   };
 
@@ -397,16 +403,22 @@ export default function SkillDetailPage() {
   };
 
   const handleLike = () => {
+    if (!skill) return;
+
     const likedSkills = JSON.parse(localStorage.getItem('likedSkills') || '[]');
     if (!isLiked) {
-      likedSkills.push(params.slug);
+      // Add skill ID to liked skills
+      if (!likedSkills.includes(skill.id)) {
+        likedSkills.push(skill.id);
+      }
       setIsLiked(true);
       toast({
         title: 'Success',
         description: 'Added to your liked skills',
       });
     } else {
-      const index = likedSkills.indexOf(params.slug);
+      // Remove skill ID from liked skills
+      const index = likedSkills.indexOf(skill.id);
       if (index > -1) {
         likedSkills.splice(index, 1);
       }
@@ -417,6 +429,8 @@ export default function SkillDetailPage() {
       });
     }
     localStorage.setItem('likedSkills', JSON.stringify(likedSkills));
+    // Signal that skills have been updated for favorites sync
+    localStorage.setItem('skillsUpdated', 'true');
   };
 
   const handleUseInKael = () => {

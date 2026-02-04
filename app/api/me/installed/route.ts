@@ -48,10 +48,11 @@ export async function POST(request: Request) {
     // Check if already installed
     const existingInstall = mockInstalledSkills.find(i => i.skillId === skillId);
     if (existingInstall) {
-      return NextResponse.json(
-        { error: 'Skill already installed' },
-        { status: 400 }
-      );
+      // Skill already installed, just return success
+      return NextResponse.json({
+        installed: existingInstall,
+        message: 'Skill already installed',
+      }, { status: 200 });
     }
 
     // Add to installed skills
