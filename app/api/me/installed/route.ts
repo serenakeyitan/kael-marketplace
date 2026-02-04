@@ -19,7 +19,7 @@ export async function GET() {
   await new Promise(resolve => setTimeout(resolve, 100));
 
   return NextResponse.json({
-    mockInstalledSkills: installedWithDetails,
+    installedSkills: installedWithDetails,
     total: installedWithDetails.length,
   });
 }
