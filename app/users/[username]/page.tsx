@@ -85,7 +85,7 @@ export default function UserProfilePage() {
       };
 
       // Mock skills data
-      const mockSkills: Skill[] = [
+      const mockSkills = [
         {
           id: '1',
           name: 'NarutorPG',
@@ -96,15 +96,14 @@ export default function UserProfilePage() {
           author: {
             name: mockProfile.name,
             username: mockProfile.username,
-            avatar: mockProfile.avatar
+            avatar: mockProfile.avatar,
+            isOfficial: false
           },
           stats: {
             installs: 13000,
             totalConversations: 0,
             rating: 4.8
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
+          }
         },
         {
           id: '2',
@@ -116,15 +115,14 @@ export default function UserProfilePage() {
           author: {
             name: mockProfile.name,
             username: mockProfile.username,
-            avatar: mockProfile.avatar
+            avatar: mockProfile.avatar,
+            isOfficial: false
           },
           stats: {
             installs: 228700,
             totalConversations: 0,
             rating: 4.9
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
+          }
         },
         {
           id: '3',
@@ -136,15 +134,14 @@ export default function UserProfilePage() {
           author: {
             name: mockProfile.name,
             username: mockProfile.username,
-            avatar: mockProfile.avatar
+            avatar: mockProfile.avatar,
+            isOfficial: false
           },
           stats: {
             installs: 189000,
             totalConversations: 0,
             rating: 4.7
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
+          }
         },
         {
           id: '4',
@@ -156,15 +153,14 @@ export default function UserProfilePage() {
           author: {
             name: mockProfile.name,
             username: mockProfile.username,
-            avatar: mockProfile.avatar
+            avatar: mockProfile.avatar,
+            isOfficial: false
           },
           stats: {
             installs: 591900,
             totalConversations: 0,
             rating: 4.6
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
+          }
         },
         {
           id: '5',
@@ -176,15 +172,14 @@ export default function UserProfilePage() {
           author: {
             name: mockProfile.name,
             username: mockProfile.username,
-            avatar: mockProfile.avatar
+            avatar: mockProfile.avatar,
+            isOfficial: false
           },
           stats: {
             installs: 169000,
             totalConversations: 0,
             rating: 4.5
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
+          }
         },
         {
           id: '6',
@@ -196,15 +191,14 @@ export default function UserProfilePage() {
           author: {
             name: mockProfile.name,
             username: mockProfile.username,
-            avatar: mockProfile.avatar
+            avatar: mockProfile.avatar,
+            isOfficial: false
           },
           stats: {
             installs: 201800,
             totalConversations: 0,
             rating: 4.9
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
+          }
         },
         {
           id: '7',
@@ -216,15 +210,14 @@ export default function UserProfilePage() {
           author: {
             name: mockProfile.name,
             username: mockProfile.username,
-            avatar: mockProfile.avatar
+            avatar: mockProfile.avatar,
+            isOfficial: false
           },
           stats: {
             installs: 50400,
             totalConversations: 0,
             rating: 4.7
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
+          }
         },
         {
           id: '8',
@@ -236,19 +229,18 @@ export default function UserProfilePage() {
           author: {
             name: mockProfile.name,
             username: mockProfile.username,
-            avatar: mockProfile.avatar
+            avatar: mockProfile.avatar,
+            isOfficial: false
           },
           stats: {
             installs: 87900,
             totalConversations: 0,
             rating: 4.8
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
+          }
         }
       ];
 
-      mockProfile.skills = mockSkills;
+      mockProfile.skills = mockSkills as Skill[];
       setProfile(mockProfile);
       setIsFollowing(mockProfile.isFollowing);
     } catch (error) {
@@ -290,7 +282,7 @@ export default function UserProfilePage() {
     if (sortBy === 'popular') {
       return b.stats.installs - a.stats.installs;
     } else {
-      return b.createdAt.getTime() - a.createdAt.getTime();
+      return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
     }
   });
 

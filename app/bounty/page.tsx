@@ -6,13 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import AddNewSkillModal from '@/components/AddNewSkillModal';
 import {
   Trophy,
   Medal,
   Award,
   Gift,
   Zap,
-  Calendar,
   Users,
   ChevronRight,
   Clock,
@@ -24,9 +24,7 @@ import {
   Code,
   Palette,
   TrendingUp,
-  Star,
   ArrowRight,
-  Coins,
   CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
@@ -37,7 +35,7 @@ interface BountyTrack {
   id: string;
   title: string;
   description: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   gradient: string;
   totalPrize: number;
   participants: number;
@@ -57,14 +55,14 @@ interface BountyTrack {
 export default function BountyPage() {
   const [selectedTrack, setSelectedTrack] = useState<BountyTrack | null>(null);
   const [bountyTracks, setBountyTracks] = useState<BountyTrack[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
+  const [preSelectedBountyId, setPreSelectedBountyId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBountyTracks();
   }, []);
 
   const fetchBountyTracks = () => {
-    setLoading(true);
     // Mock bounty tracks data
     const mockTracks: BountyTrack[] = [
       {
@@ -159,7 +157,6 @@ export default function BountyPage() {
     ];
 
     setBountyTracks(mockTracks);
-    setLoading(false);
   };
 
   const getStatusBadge = (status: string) => {
@@ -304,7 +301,7 @@ export default function BountyPage() {
                       <div>
                         <h4 className="font-medium mb-1">Submit Your Entry</h4>
                         <p className="text-sm text-muted-foreground">
-                          Click "Create Skill for This Bounty" to submit your entry with bounty participation
+                          Click &ldquo;Create Skill for This Bounty&rdquo; to submit your entry with bounty participation
                         </p>
                       </div>
                     </div>
@@ -412,12 +409,17 @@ export default function BountyPage() {
 
               {/* Submit Button */}
               {selectedTrack.status === 'active' && (
-                <Link href={`/create?bountyId=${selectedTrack.id}&bountyName=${encodeURIComponent(selectedTrack.title)}`}>
-                  <Button className="w-full" size="lg">
-                    <Rocket className="h-5 w-5 mr-2" />
-                    Create Skill for This Bounty
-                  </Button>
-                </Link>
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => {
+                    setPreSelectedBountyId(selectedTrack.id);
+                    setIsAddSkillModalOpen(true);
+                  }}
+                >
+                  <Rocket className="h-5 w-5 mr-2" />
+                  Create Skill for This Bounty
+                </Button>
               )}
             </div>
           </div>
@@ -683,6 +685,13 @@ export default function BountyPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Add New Skill Modal */}
+      <AddNewSkillModal
+        open={isAddSkillModalOpen}
+        onOpenChange={setIsAddSkillModalOpen}
+        preSelectedBounty={preSelectedBountyId || undefined}
+      />
     </div>
   );
 }

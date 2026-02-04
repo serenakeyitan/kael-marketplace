@@ -1,7 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // In-memory storage for development (replace with database in production)
-let reviews = new Map<string, any[]>();
+interface Reply {
+  id: string;
+  helpful?: number;
+  notHelpful?: number;
+}
+
+interface Review {
+  id: string;
+  skillId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  helpful: number;
+  notHelpful?: number;
+  reported: boolean;
+  replies?: Reply[];
+  isRecommended?: boolean;
+}
+const reviews = new Map<string, Review[]>();
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -37,18 +57,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newReview = {
+    const newReview: Review = {
       id: Date.now().toString(),
       skillId,
+      userId: 'user-1', // In production, this would come from auth
       userName,
-      userAvatar: userAvatar || null,
       rating,
       comment,
-      timestamp: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       helpful: 0,
-      notHelpful: 0,
-      isRecommended: rating >= 4,
-      replies: []
+      reported: false
     };
 
     const skillReviews = reviews.get(skillId) || [];
@@ -56,7 +74,7 @@ export async function POST(request: NextRequest) {
     reviews.set(skillId, skillReviews);
 
     return NextResponse.json({ success: true, review: newReview });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to create review' },
       { status: 500 }
@@ -128,7 +146,7 @@ export async function PATCH(request: NextRequest) {
           );
         }
 
-        const reply = review.replies?.find((r: any) => r.id === replyId);
+        const reply = review.replies?.find((r: Reply) => r.id === replyId);
         if (!reply) {
           return NextResponse.json(
             { error: 'Reply not found' },
@@ -154,7 +172,7 @@ export async function PATCH(request: NextRequest) {
     reviews.set(skillId, skillReviews);
 
     return NextResponse.json({ success: true, review });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to update review' },
       { status: 500 }
@@ -188,7 +206,7 @@ export async function DELETE(request: NextRequest) {
     reviews.set(skillId, filteredReviews);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to delete review' },
       { status: 500 }

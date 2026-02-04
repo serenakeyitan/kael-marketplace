@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import AddNewSkillModal from '@/components/AddNewSkillModal';
 import {
   Search,
   Plus,
@@ -27,18 +29,20 @@ import {
 export default function Header() {
   const pathname = usePathname();
   const { user, isCreator, switchRole, logout } = useAuth();
+  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
-  const navigation = [
+  const navigation: Array<{ name: string; href: string; icon: any; isModal?: boolean }> = [
     { name: 'Browse', href: '/', icon: Search },
     { name: 'My Skills', href: '/my-skills', icon: Package },
   ];
 
   if (isCreator) {
-    navigation.push({ name: 'Create', href: '/create', icon: Plus });
+    navigation.push({ name: 'Create', href: '/create', icon: Plus, isModal: true });
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <>
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo and Brand */}
@@ -58,6 +62,20 @@ export default function Header() {
               const isActive = pathname === item.href ||
                 (item.href === '/' && pathname === '/') ||
                 (item.href !== '/' && pathname.startsWith(item.href));
+
+              // Handle modal items differently
+              if (item.isModal) {
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => setIsAddSkillModalOpen(true)}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{item.name}</span>
+                  </button>
+                );
+              }
 
               return (
                 <Link
@@ -120,11 +138,12 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 {isCreator && (
-                  <DropdownMenuItem className="md:hidden" asChild>
-                    <Link href="/create">
-                      <Plus className="mr-2 h-4 w-4" />
-                      <span>Create Skill</span>
-                    </Link>
+                  <DropdownMenuItem
+                    className="md:hidden cursor-pointer"
+                    onClick={() => setIsAddSkillModalOpen(true)}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    <span>Create Skill</span>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator className="md:hidden" />
@@ -152,5 +171,12 @@ export default function Header() {
         </div>
       </div>
     </header>
+
+      {/* Add New Skill Modal */}
+      <AddNewSkillModal
+        open={isAddSkillModalOpen}
+        onOpenChange={setIsAddSkillModalOpen}
+      />
+    </>
   );
 }
