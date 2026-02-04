@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import SkillCardNew from '@/components/SkillCardNew';
+import AddNewSkillModal from '@/components/AddNewSkillModal';
 import {
   User,
   Users,
@@ -81,6 +82,7 @@ export default function ProfilePage() {
   const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
   const [followingList, setFollowingList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
   useEffect(() => {
     fetchUserData();
@@ -323,7 +325,7 @@ export default function ProfilePage() {
               </Avatar>
               <div className="text-white">
                 <h1 className="text-3xl font-bold mb-1">{user?.name || 'User'}</h1>
-                <p className="text-white/90 mb-3">@{user?.username || 'username'}</p>
+                <p className="text-white/90 mb-3">@{user?.email?.split('@')[0] || 'username'}</p>
                 <div className="flex items-center gap-4">
                   {isCreator && (
                     <Badge className="bg-white/20 text-white border-white/30 backdrop-blur">
@@ -565,12 +567,10 @@ export default function ProfilePage() {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Your Created Skills</h2>
-                  <Link href="/create">
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create New Skill
-                    </Button>
-                  </Link>
+                  <Button onClick={() => setIsAddSkillModalOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Skill
+                  </Button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {createdSkills.map((skill) => (
@@ -599,12 +599,13 @@ export default function ProfilePage() {
                   <p className="text-muted-foreground mb-4 max-w-md mx-auto">
                     Start creating your own AI skills and share them with the community
                   </p>
-                  <Link href="/create">
-                    <Button className="justify-between gap-3">
-                      <span>Create</span>
-                      <ArrowUpRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                  <Button
+                    onClick={() => setIsAddSkillModalOpen(true)}
+                    className="justify-between gap-3"
+                  >
+                    <span>Create</span>
+                    <ArrowUpRight className="h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
             )}
@@ -742,6 +743,12 @@ export default function ProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Add New Skill Modal */}
+      <AddNewSkillModal
+        open={isAddSkillModalOpen}
+        onOpenChange={setIsAddSkillModalOpen}
+      />
     </div>
   );
 }

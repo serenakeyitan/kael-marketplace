@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       skill: newSkill,
       message: 'Skill uploaded successfully',
     }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to upload skill' },
       { status: 500 }
@@ -92,7 +92,7 @@ export async function PATCH(request: Request) {
       skill,
       message: 'Skill updated successfully',
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to update skill' },
       { status: 500 }

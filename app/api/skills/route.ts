@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { mockSkills, mockInstalledSkills, mockUploadedSkills } from '@/data/mockSkills';
-import { Skill } from '@/types/skill';
+import { Skill, AudienceTag } from '@/types/skill';
 
 export const dynamic = 'force-dynamic'; // Disable caching
 
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
   // Audience tags filter
   if (tags.length > 0) {
     filteredSkills = filteredSkills.filter(skill =>
-      tags.some(tag => skill.audienceTags.includes(tag as any))
+      tags.some(tag => skill.audienceTags.includes(tag as AudienceTag))
     );
   }
 
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
       skill: newSkill,
       message: 'Skill created successfully and automatically installed',
     }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to create skill' },
       { status: 500 }

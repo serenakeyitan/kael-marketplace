@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       installed: newInstall,
       message: 'Skill installed successfully',
     }, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to install skill' },
       { status: 500 }
@@ -91,7 +91,6 @@ export async function DELETE(request: Request) {
     }
 
     // Remove from installed skills
-    const initialLength = mockInstalledSkills.length;
     const indexToRemove = mockInstalledSkills.findIndex(i => i.skillId === skillId);
 
     if (indexToRemove === -1) {
@@ -106,7 +105,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({
       message: 'Skill uninstalled successfully',
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to uninstall skill' },
       { status: 500 }
@@ -162,7 +161,7 @@ export async function PATCH(request: Request) {
       updated: installedSkill,
       message: `Skill ${isEnabled ? 'enabled' : 'disabled'} successfully`,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to update skill' },
       { status: 500 }

@@ -18,6 +18,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import SkillCardNew from '@/components/SkillCardNew';
+import AddNewSkillModal from '@/components/AddNewSkillModal';
 import { Skill } from '@/types/skill';
 import {
   Package,
@@ -85,6 +86,7 @@ export default function MySkillsPage() {
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [loadingUploaded, setLoadingUploaded] = useState(true);
   const [updatingSkill, setUpdatingSkill] = useState<string | null>(null);
+  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
   useEffect(() => {
     fetchInstalledSkills();
@@ -539,7 +541,7 @@ export default function MySkillsPage() {
               <p className="text-sm text-muted-foreground">
                 {uploadedSkills.length} skill{uploadedSkills.length !== 1 ? 's' : ''} uploaded
               </p>
-              <Button onClick={() => router.push('/create')}>
+              <Button onClick={() => setIsAddSkillModalOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create New Skill
               </Button>
@@ -557,7 +559,7 @@ export default function MySkillsPage() {
                   <p className="text-muted-foreground mb-4">
                     Create and share your first skill with the community
                   </p>
-                  <Button onClick={() => router.push('/create')} className="justify-between gap-3">
+                  <Button onClick={() => setIsAddSkillModalOpen(true)} className="justify-between gap-3">
                     <span>Create</span>
                     <ArrowUpRight className="h-4 w-4" />
                   </Button>
@@ -657,6 +659,12 @@ export default function MySkillsPage() {
           </TabsContent>
         )}
       </Tabs>
+
+      {/* Add New Skill Modal */}
+      <AddNewSkillModal
+        open={isAddSkillModalOpen}
+        onOpenChange={setIsAddSkillModalOpen}
+      />
     </div>
   );
 }
