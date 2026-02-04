@@ -18,6 +18,7 @@ import {
   ExternalLink,
   Users,
   MessageCircle,
+  Flame,
   Star,
   Calendar,
   Tag,
@@ -773,7 +774,7 @@ export default function SkillDetailPage() {
                   <span className="text-sm text-white/70">installs</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5" />
+                  <Flame className="h-5 w-5" />
                   <span className="font-semibold">{(skill.stats.totalConversations / 1000).toFixed(0)}k</span>
                   <span className="text-sm text-white/70">conversations</span>
                 </div>

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skill } from '@/types/skill';
-import { Heart, Users, MessageCircle, Sparkles, ExternalLink, ArrowRight } from 'lucide-react';
+import { Heart, Users, MessageCircle, Flame, Sparkles, ExternalLink, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -122,20 +122,12 @@ export default function SkillCardNew({ skill, onUseSkill, initialLiked = false, 
               }} />
             </div>
 
-            {/* Top Bar with Category and Stats - Responsive positioning */}
+            {/* Top Bar with Category and Like Button - Responsive positioning */}
             <div className="absolute top-2 sm:top-2.5 lg:top-3 left-2 sm:left-2.5 lg:left-3 right-2 sm:right-2.5 lg:right-3 flex items-center justify-between z-10">
               {/* Category Badge with responsive sizing */}
               <Badge className="bg-white/20 text-white backdrop-blur border-0 text-[10px] sm:text-[11px] lg:text-xs px-2 sm:px-2.5 py-0.5 sm:py-1">
                 {skill.category}
               </Badge>
-
-              {/* Stats - Show total conversations with responsive sizing */}
-              <div className="flex-1 flex items-center justify-center text-[10px] sm:text-[11px] lg:text-xs text-white/85">
-                <div className="flex items-center gap-0.5">
-                  <MessageCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 lg:h-3.5 lg:w-3.5" />
-                  {(skill.stats.totalConversations / 1000).toFixed(1)}k
-                </div>
-              </div>
 
               {/* Like Button with responsive sizing */}
               <button
@@ -158,20 +150,28 @@ export default function SkillCardNew({ skill, onUseSkill, initialLiked = false, 
             "group-hover:-translate-y-[80px]"
           )}>
             <div className="p-4 pt-4">
-              {/* Author Info */}
-              <Link
-                href={`/users/${skill.author?.username || 'anonymous'}`}
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1.5 mb-1 group/author hover:opacity-80 transition-opacity w-fit"
-              >
-                <Avatar className="h-4 w-4">
-                  <AvatarImage src={skill.author?.avatar} />
-                  <AvatarFallback className="text-xs bg-gray-100">
-                    {skill.author?.name?.charAt(0) || 'A'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-gray-600 group-hover/author:text-gray-900">{skill.author?.name || 'Anonymous'}</span>
-              </Link>
+              {/* Author Info and Stats on same line */}
+              <div className="flex items-center justify-between mb-1">
+                <Link
+                  href={`/users/${skill.author?.username || 'anonymous'}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1.5 group/author hover:opacity-80 transition-opacity"
+                >
+                  <Avatar className="h-4 w-4">
+                    <AvatarImage src={skill.author?.avatar} />
+                    <AvatarFallback className="text-xs bg-gray-100">
+                      {skill.author?.name?.charAt(0) || 'A'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs text-gray-600 group-hover/author:text-gray-900">{skill.author?.name || 'Anonymous'}</span>
+                </Link>
+
+                {/* Stats - Only conversations */}
+                <div className="flex items-center gap-0.5 text-xs text-gray-500">
+                  <Flame className="h-3 w-3" />
+                  <span>{(skill.stats.totalConversations / 1000).toFixed(1)}k</span>
+                </div>
+              </div>
 
               {/* Title */}
               <h3 className="font-semibold text-gray-900 mb-1 text-base line-clamp-1">
