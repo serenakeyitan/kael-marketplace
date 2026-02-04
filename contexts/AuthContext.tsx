@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
+import { useAuthSync } from '@/hooks/use-auth-sync';
 
 export type UserRole = 'user' | 'creator';
 
@@ -46,7 +47,7 @@ function resolveUserRole(user: SessionUser | undefined): UserRole | null {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { data: session } = authClient.useSession();
+  const session = useAuthSync(); // This also syncs the user to Supabase
   const [roleOverride, setRoleOverride] = useState<UserRole | null>(null);
 
   useEffect(() => {

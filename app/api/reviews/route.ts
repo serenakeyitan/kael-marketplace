@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getServerSession } from '@/lib/auth-server';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -94,10 +95,20 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get the current session
+    const session = await getServerSession();
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { skillId, rating, comment, userName, userAvatar } = body;
 
-    if (!skillId || !rating || !comment || !userName) {
+    if (!skillId || !rating || !comment) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -123,9 +134,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // For now, use a placeholder user ID since we haven't integrated Better Auth yet
-    // This will be replaced with actual user ID from Better Auth session
-    const userId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'; // Placeholder
+    const userId = session.user.id;
+    const finalUserName = userName || session.user.name || session.user.email;
 
     // Check if user already reviewed this skill
     const { data: existingReview } = await supabase
@@ -148,9 +158,9 @@ export async function POST(request: NextRequest) {
       .insert({
         skill_id: actualSkillId,
         user_id: userId,
-        user_name: userName,
-        user_username: userName.toLowerCase().replace(/\s+/g, ''),
-        user_avatar: userAvatar || null,
+        user_name: finalUserName,
+        user_username: finalUserName.toLowerCase().replace(/\s+/g, ''),
+        user_avatar: userAvatar || session.user.image || null,
         rating,
         content: comment,
       })
@@ -196,6 +206,16 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    // Get the current session
+    const session = await getServerSession();
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { skillId, reviewId, action, voteType, replyData } = body;
 
@@ -235,24 +255,24 @@ export async function PATCH(request: NextRequest) {
         break;
 
       case 'reply':
-        if (!replyData || !replyData.comment || !replyData.userName) {
+        if (!replyData || !replyData.comment) {
           return NextResponse.json(
             { error: 'Reply data is incomplete' },
             { status: 400 }
           );
         }
 
-        // For now, use placeholder user ID
-        const userId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+        const userId = session.user.id;
+        const replyUserName = replyData.userName || session.user.name || session.user.email;
 
         const { data: newReply, error } = await supabase
           .from('review_replies')
           .insert({
             review_id: reviewId,
             user_id: userId,
-            user_name: replyData.userName,
-            user_username: replyData.userName.toLowerCase().replace(/\s+/g, ''),
-            user_avatar: replyData.userAvatar || null,
+            user_name: replyUserName,
+            user_username: replyUserName.toLowerCase().replace(/\s+/g, ''),
+            user_avatar: replyData.userAvatar || session.user.image || null,
             content: replyData.comment,
           })
           .select()
