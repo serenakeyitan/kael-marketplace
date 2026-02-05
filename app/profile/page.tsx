@@ -33,7 +33,8 @@ import {
   ExternalLink,
   Plus,
   MoreHorizontal,
-  ArrowUpRight
+  ArrowUpRight,
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -91,124 +92,92 @@ export default function ProfilePage() {
   const fetchUserData = async () => {
     setLoading(true);
 
-    // Mock data
-    setUserStats({
-      skillsCreated: 5,
-      skillsInstalled: 23,
-      totalUsage: 45230,
-      totalInstalls: 12500,
-      averageRating: 4.7,
-      achievements: [
-        {
-          id: '1',
-          title: 'Early Adopter',
-          description: 'Joined in the first month',
-          icon: Trophy,
-          unlocked: true
-        },
-        {
-          id: '2',
-          title: 'Skill Creator',
-          description: 'Created your first skill',
-          icon: Code,
-          unlocked: true
-        },
-        {
-          id: '3',
-          title: 'Popular Creator',
-          description: 'Get 10,000+ installs',
-          icon: TrendingUp,
-          unlocked: true
-        },
-        {
-          id: '4',
-          title: 'Bounty Hunter',
-          description: 'Win a bounty challenge',
-          icon: Award,
-          unlocked: false,
-          progress: 75
-        },
-        {
-          id: '5',
-          title: 'Community Star',
-          description: 'Get 100+ reviews',
-          icon: Star,
-          unlocked: false,
-          progress: 45
-        }
-      ]
-    });
+    try {
+      // Fetch profile data from API
+      const response = await fetch('/api/me/profile');
 
-    // Mock created skills
-    setCreatedSkills([
-      {
-        id: '1',
-        name: 'Literature Review Assistant',
-        slug: 'literature-review',
-        shortDescription: 'Comprehensive literature review with citation management',
-        category: 'Academic',
-        stats: {
-          installs: 5230,
-          totalConversations: 12850,
-          rating: 4.9
-        },
-        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: '2',
-        name: 'Smart Flashcards',
-        slug: 'flashcards',
-        shortDescription: 'AI-powered flashcard generation',
-        category: 'Academic',
-        stats: {
-          installs: 3890,
-          totalConversations: 11500,
-          rating: 4.8
-        },
-        createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: '3',
-        name: 'Code Review Pro',
-        slug: 'code-review',
-        shortDescription: 'Automated code review assistant',
-        category: 'Programming',
-        stats: {
-          installs: 3210,
-          totalConversations: 9800,
-          rating: 4.7
-        },
-        createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+      if (response.ok) {
+        const data = await response.json();
+
+        // Map icon strings to actual components
+        const iconMap: { [key: string]: any } = {
+          'Trophy': Trophy,
+          'Sparkles': Sparkles,
+          'Zap': Zap,
+          'Code': Code,
+          'Star': Star,
+          'Users': Users,
+          'TrendingUp': TrendingUp,
+          'Award': Award
+        };
+
+        // Set user stats with proper icon mapping
+        setUserStats({
+          ...data.stats,
+          achievements: data.stats.achievements.map((achievement: any) => ({
+            ...achievement,
+            icon: iconMap[achievement.icon] || Trophy
+          }))
+        });
+
+        // Set created skills if available
+        if (data.createdSkills) {
+          setCreatedSkills(data.createdSkills);
+        }
+      } else {
+        // Use default mock data if API fails
+        console.log('Using mock data - API returned:', response.status);
+        setUserStats({
+          skillsCreated: 0,
+          skillsInstalled: 0,
+          totalUsage: 0,
+          totalInstalls: 0,
+          averageRating: 0,
+          achievements: [
+            {
+              id: '1',
+              title: 'First Steps',
+              description: 'Install your first skill',
+              icon: Trophy,
+              unlocked: false,
+              progress: 0
+            },
+            {
+              id: '2',
+              title: 'Skill Explorer',
+              description: 'Install 3 skills',
+              icon: Sparkles,
+              unlocked: false,
+              progress: 0
+            }
+          ]
+        });
       }
-    ]);
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+      // Set default empty state on error
+      setUserStats({
+        skillsCreated: 0,
+        skillsInstalled: 0,
+        totalUsage: 0,
+        totalInstalls: 0,
+        averageRating: 0,
+        achievements: []
+      });
+    }
 
-    // Mock installed skills
-    setInstalledSkills([
-      {
-        id: '4',
-        name: 'Data Analysis Wizard',
-        slug: 'data-analysis',
-        shortDescription: 'Statistical analysis from datasets',
-        category: 'Programming',
-        stats: {
-          installs: 2870,
-          totalConversations: 8900,
-          rating: 4.8
-        }
-      },
-      {
-        id: '5',
-        name: 'Mind Map Generator',
-        slug: 'mind-mapper',
-        shortDescription: 'Visual mind maps from content',
-        category: 'Academic',
-        stats: {
-          installs: 2560,
-          totalConversations: 7800,
-          rating: 4.6
+    // Fetch installed skills
+    try {
+      const installedResponse = await fetch('/api/me/installed');
+      if (installedResponse.ok) {
+        const installedData = await installedResponse.json();
+        if (installedData.installedSkills) {
+          setInstalledSkills(installedData.installedSkills.map((item: any) => item.skill));
         }
       }
-    ]);
+    } catch (error) {
+      console.error('Error fetching installed skills:', error);
+    }
 
     // Mock following list
     setFollowingList([
@@ -573,7 +542,7 @@ export default function ProfilePage() {
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {createdSkills.map((skill) => (
+                  {(createdSkills || []).map((skill) => (
                     <SkillCardNew
                       key={skill.id}
                       skill={skill}
@@ -615,7 +584,7 @@ export default function ProfilePage() {
             <div>
               <h2 className="text-xl font-semibold mb-6">Installed Skills</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {installedSkills.map((skill) => (
+                {(installedSkills || []).map((skill) => (
                   <SkillCardNew
                     key={skill.id}
                     skill={skill}
