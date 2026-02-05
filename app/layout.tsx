@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Sidebar from "@/components/Sidebar";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthModalProvider } from "@/components/AuthModalProvider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -48,6 +49,7 @@ export default function RootLayout({
               </div>
             </div>
             <Toaster />
+            <AuthModalProvider />
           </AuthProvider>
         </Providers>
       </body>

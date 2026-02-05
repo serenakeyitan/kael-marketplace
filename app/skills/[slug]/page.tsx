@@ -47,6 +47,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthModal } from '@/hooks/use-auth-modal';
 import { cn } from '@/lib/utils';
 
 interface ReviewReply {
@@ -80,7 +81,8 @@ export default function SkillDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const [skill, setSkill] = useState<Skill | null>(null);
   const [relatedSkills, setRelatedSkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -317,6 +319,12 @@ export default function SkillDetailPage() {
   };
 
   const handleInstall = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to install this skill');
+      return;
+    }
+
     if (!skill) {
       toast({
         title: 'Error',
@@ -404,6 +412,12 @@ export default function SkillDetailPage() {
   };
 
   const handleLike = () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to like this skill');
+      return;
+    }
+
     if (!skill) return;
 
     const likedSkills = JSON.parse(localStorage.getItem('likedSkills') || '[]');
@@ -621,6 +635,12 @@ export default function SkillDetailPage() {
   };
 
   const handleSubmitReview = () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to post a review');
+      return;
+    }
+
     if (!reviewText.trim() || userRating === 0) {
       toast({
         title: 'Error',
@@ -1014,7 +1034,13 @@ export default function SkillDetailPage() {
                   <Button
                     className="w-full"
                     variant="outline"
-                    onClick={() => setShowReviewForm(true)}
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        openAuthModal('Sign in to write a review');
+                        return;
+                      }
+                      setShowReviewForm(true);
+                    }}
                   >
                     Post Review
                   </Button>

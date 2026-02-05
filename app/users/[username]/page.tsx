@@ -18,6 +18,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAuthModal } from '@/hooks/use-auth-modal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +57,8 @@ export default function UserProfilePage() {
   const params = useParams();
   const username = params.username as string;
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,6 +103,12 @@ export default function UserProfilePage() {
   };
 
   const handleFollow = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to follow this user');
+      return;
+    }
+
     try {
       const method = isFollowing ? 'DELETE' : 'POST';
       const response = await fetch(`/api/users/${username}/follow`, {
