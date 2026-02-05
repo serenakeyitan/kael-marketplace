@@ -51,21 +51,51 @@ export default function Sidebar({ className }: SidebarProps) {
   const [recentSkills, setRecentSkills] = useState<any[]>([]);
   const [favoriteSkills, setFavoriteSkills] = useState<any[]>([]);
 
-  // Load recent skills from localStorage and favorites
+  // Load recent skills from database and favorites
   useEffect(() => {
-    const loadRecentSkills = () => {
+    const loadRecentSkills = async () => {
+      // First try to load from database
+      try {
+        const response = await fetch('/api/recent-skills');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.skills && data.skills.length > 0) {
+            setRecentSkills(data.skills.slice(0, 3)); // Only show top 3
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading recent skills from database:', error);
+      }
+
+      // Fall back to localStorage for anonymous users or if database fails
       const stored = localStorage.getItem('recentSkills');
       if (stored) {
         try {
           const skills = JSON.parse(stored);
           setRecentSkills(skills.slice(0, 3)); // Only show top 3
         } catch (e) {
-          console.error('Error loading recent skills:', e);
+          console.error('Error loading recent skills from localStorage:', e);
         }
       }
     };
 
     const loadFavoriteSkills = async () => {
+      // First try to load from database
+      try {
+        const response = await fetch('/api/liked-skills');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.skills && data.skills.length > 0) {
+            setFavoriteSkills(data.skills);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading favorite skills from database:', error);
+      }
+
+      // Fall back to localStorage for anonymous users or if database fails
       const likedSkillIds = JSON.parse(localStorage.getItem('likedSkills') || '[]');
       if (likedSkillIds.length > 0) {
         try {
@@ -79,7 +109,7 @@ export default function Sidebar({ className }: SidebarProps) {
             setFavoriteSkills(likedSkillsData);
           }
         } catch (error) {
-          console.error('Error loading favorite skills:', error);
+          console.error('Error loading favorite skills from localStorage:', error);
         }
       }
     };

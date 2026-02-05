@@ -157,6 +157,18 @@ export default function SkillDetailPage() {
 
       // Track this as a recently viewed skill
       if (data.skill) {
+        // Track in database (for authenticated users)
+        try {
+          await fetch('/api/recent-skills', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ skillId: data.skill.id })
+          });
+        } catch (error) {
+          console.error('Failed to track recent skill:', error);
+        }
+
+        // Also keep localStorage for backward compatibility and anonymous users
         const recentSkills = JSON.parse(localStorage.getItem('recentSkills') || '[]');
         const skillInfo = {
           id: data.skill.id,

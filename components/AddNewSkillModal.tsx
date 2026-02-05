@@ -34,6 +34,7 @@ import {
   Loader2,
   Sparkles,
   CheckCircle,
+  Github,
 } from 'lucide-react';
 
 interface AddNewSkillModalProps {
@@ -74,6 +75,7 @@ export default function AddNewSkillModal({
   // Form state for upload dialog
   const [uploadedZip, setUploadedZip] = useState<File | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [githubUrl, setGithubUrl] = useState<string>('');
   const [isPublished, setIsPublished] = useState(true);
   const [participateInBounty, setParticipateInBounty] = useState(!!preSelectedBounty);
   const [selectedBounty, setSelectedBounty] = useState(preSelectedBounty || '');
@@ -132,6 +134,7 @@ export default function AddNewSkillModal({
         version: '1.0.0',
         bountyId: participateInBounty ? selectedBounty : undefined,
         status: isPublished ? 'published' : 'private',
+        githubUrl: githubUrl || undefined,
       };
 
       const response = await fetch('/api/skills', {
@@ -174,6 +177,7 @@ export default function AddNewSkillModal({
     setShowUploadDialog(false);
     setUploadedZip(null);
     setSelectedCategory('');
+    setGithubUrl('');
     setIsPublished(true);
     setParticipateInBounty(!!preSelectedBounty);
     setSelectedBounty(preSelectedBounty || '');
@@ -321,6 +325,27 @@ export default function AddNewSkillModal({
               </Select>
               <p className="text-sm text-muted-foreground">
                 Help users discover your skill by selecting a relevant category
+              </p>
+            </div>
+
+            {/* GitHub URL */}
+            <div className="space-y-2">
+              <Label htmlFor="github-url" className="text-sm font-medium">
+                GitHub Repository (Optional)
+              </Label>
+              <div className="relative">
+                <Github className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="github-url"
+                  type="url"
+                  placeholder="https://github.com/username/repository"
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Link to your skill's source code repository
               </p>
             </div>
 
