@@ -137,6 +137,8 @@ export default function ProfilePage() {
           totalUsage: 0,
           totalInstalls: 0,
           averageRating: 0,
+          followers: 0,
+          following: 0,
           achievements: [
             {
               id: '1',
@@ -166,6 +168,8 @@ export default function ProfilePage() {
         totalUsage: 0,
         totalInstalls: 0,
         averageRating: 0,
+        followers: 0,
+        following: 0,
         achievements: []
       });
     }
@@ -227,41 +231,7 @@ export default function ProfilePage() {
       }
     ]);
 
-    // Mock activity
-    setActivityItems([
-      {
-        id: '1',
-        type: 'created',
-        title: 'Created Literature Review Assistant',
-        description: 'New skill published to marketplace',
-        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        icon: Plus
-      },
-      {
-        id: '2',
-        type: 'installed',
-        title: 'Installed Data Analysis Wizard',
-        description: 'Added to your skills collection',
-        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        icon: Package
-      },
-      {
-        id: '3',
-        type: 'achievement',
-        title: 'Unlocked Popular Creator',
-        description: 'Reached 10,000+ total installs',
-        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        icon: Award
-      },
-      {
-        id: '4',
-        type: 'reviewed',
-        title: 'Reviewed Mind Map Generator',
-        description: 'Left a 5-star review',
-        timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-        icon: Star
-      }
-    ]);
+    // Activity removed as per user request
 
     setLoading(false);
   };

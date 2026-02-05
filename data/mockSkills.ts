@@ -8,7 +8,7 @@ export const mockSkills: Skill[] = [
     name: 'Literature Review Assistant',
     shortDescription: 'Systematic literature review with citation management',
     longDescription: 'Comprehensive literature review tool that helps you search, organize, and synthesize academic papers. Supports multiple citation formats and creates structured summaries with proper academic formatting.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['PhD students', 'Academic researchers', 'Literature review focused users'],
     author: {
       name: 'Kael Team',
@@ -35,7 +35,7 @@ export const mockSkills: Skill[] = [
     name: 'Citation Checker',
     shortDescription: 'Verify and format citations in any style',
     longDescription: 'Automatically checks citations for accuracy, completeness, and proper formatting. Supports APA, MLA, Chicago, and more. Identifies missing information and suggests corrections.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['Graduate students', 'Academic researchers', 'Writers'],
     author: {
       name: 'Dr. Sarah Chen',
@@ -63,7 +63,7 @@ export const mockSkills: Skill[] = [
     name: 'Smart Flashcards',
     shortDescription: 'AI-powered flashcard generation with spaced repetition',
     longDescription: 'Create intelligent flashcards from any content. Uses spaced repetition algorithms to optimize learning. Tracks progress and adapts to your learning pace.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['Exam-focused students', 'Undergraduate students', 'Cram / test-prep students'],
     author: {
       name: 'Kael Team',
@@ -89,7 +89,7 @@ export const mockSkills: Skill[] = [
     name: 'Quiz Generator Pro',
     shortDescription: 'Generate practice quizzes from course materials',
     longDescription: 'Automatically creates quizzes from lectures, textbooks, or notes. Includes multiple choice, true/false, and short answer questions with detailed explanations.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['Exam-focused students', 'Coursework-heavy students', 'Teaching assistants'],
     author: {
       name: 'EduTools Inc',
@@ -117,7 +117,7 @@ export const mockSkills: Skill[] = [
     name: 'Code Review Assistant',
     shortDescription: 'Automated code review with best practices',
     longDescription: 'Comprehensive code review tool that checks for bugs, security issues, performance problems, and style violations. Provides actionable feedback and improvement suggestions.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Engineers', 'Indie builders', 'Open source contributors'],
     author: {
       name: 'Kael Team',
@@ -143,7 +143,7 @@ export const mockSkills: Skill[] = [
     name: 'API Documentation Generator',
     shortDescription: 'Generate OpenAPI specs and documentation',
     longDescription: 'Automatically generates comprehensive API documentation from code. Creates OpenAPI/Swagger specifications, README files, and interactive documentation.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Engineers', 'Tool makers', 'Product managers'],
     author: {
       name: 'DevTools Pro',
@@ -171,7 +171,7 @@ export const mockSkills: Skill[] = [
     name: 'Data Analysis Wizard',
     shortDescription: 'Statistical analysis and visualization from datasets',
     longDescription: 'Performs comprehensive data analysis including descriptive statistics, hypothesis testing, and visualizations. Supports CSV, Excel, and JSON formats.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Data scientists', 'Analysts', 'Academic researchers'],
     author: {
       name: 'Kael Team',
@@ -197,7 +197,7 @@ export const mockSkills: Skill[] = [
     name: 'ML Model Assistant',
     shortDescription: 'Machine learning model selection and tuning',
     longDescription: 'Helps select appropriate ML models for your data, provides hyperparameter tuning suggestions, and explains model predictions in plain language.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Data scientists', 'Engineers', 'PhD students'],
     author: {
       name: 'AI Labs',
@@ -225,7 +225,7 @@ export const mockSkills: Skill[] = [
     name: 'README Generator',
     shortDescription: 'Professional README files for any project',
     longDescription: 'Creates comprehensive README files with proper structure, badges, installation instructions, usage examples, and contribution guidelines.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Open source contributors', 'Indie builders', 'Engineers'],
     author: {
       name: 'Kael Team',
@@ -251,7 +251,7 @@ export const mockSkills: Skill[] = [
     name: 'Technical Writing Assistant',
     shortDescription: 'Clear technical documentation and guides',
     longDescription: 'Helps write clear, concise technical documentation including user guides, API references, and tutorials. Ensures consistency and follows documentation best practices.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Writers', 'Product managers', 'Engineers'],
     author: {
       name: 'DocuPro',
@@ -279,7 +279,7 @@ export const mockSkills: Skill[] = [
     name: 'Business Plan Builder',
     shortDescription: 'Comprehensive business plans and pitch decks',
     longDescription: 'Creates detailed business plans including market analysis, financial projections, and strategic planning. Generates professional pitch decks for investors.',
-    category: 'Business',
+    category: 'productivity',
     audienceTags: ['Consultants', 'Indie builders', 'Product managers'],
     author: {
       name: 'BizTools',
@@ -305,7 +305,7 @@ export const mockSkills: Skill[] = [
     name: 'Market Research Analyst',
     shortDescription: 'Competitor analysis and market insights',
     longDescription: 'Conducts comprehensive market research including competitor analysis, market sizing, customer segmentation, and trend identification.',
-    category: 'Business',
+    category: 'productivity',
     audienceTags: ['Consultants', 'Product managers', 'Analysts'],
     author: {
       name: 'MarketInsight',
@@ -333,7 +333,7 @@ export const mockSkills: Skill[] = [
     name: 'Content Calendar Creator',
     shortDescription: 'Social media and blog content planning',
     longDescription: 'Plans and organizes content across multiple platforms. Creates posting schedules, content themes, and engagement strategies tailored to your audience.',
-    category: 'Marketing',
+    category: 'communication',
     audienceTags: ['Content creators', 'Writers', 'Product managers'],
     author: {
       name: 'ContentPro',
@@ -359,7 +359,7 @@ export const mockSkills: Skill[] = [
     name: 'Creative Writing Coach',
     shortDescription: 'Story development and writing improvement',
     longDescription: 'Assists with creative writing projects including plot development, character creation, dialogue improvement, and writing style refinement.',
-    category: 'Marketing',
+    category: 'communication',
     audienceTags: ['Writers', 'Content creators', 'Indie builders'],
     author: {
       name: 'WritersHub',
@@ -387,7 +387,7 @@ export const mockSkills: Skill[] = [
     name: 'Advanced Text Formatter',
     shortDescription: 'Format, convert, and transform text',
     longDescription: 'Powerful text manipulation tool for formatting, converting between formats (Markdown, HTML, plain text), and applying transformations.',
-    category: 'Prompt',
+    category: 'creative',
     audienceTags: ['Writers', 'Engineers', 'Content creators'],
     author: {
       name: 'Kael Team',
@@ -413,7 +413,7 @@ export const mockSkills: Skill[] = [
     name: 'Regex Builder & Tester',
     shortDescription: 'Build and test regular expressions',
     longDescription: 'Interactive regex builder with explanations, testing, and code generation for multiple programming languages.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Engineers', 'Data scientists', 'Tool makers'],
     author: {
       name: 'DevUtils',
@@ -441,7 +441,7 @@ export const mockSkills: Skill[] = [
     name: 'Mind Map Generator',
     shortDescription: 'Visual mind maps from any content',
     longDescription: 'Creates interactive mind maps from lectures, books, or brainstorming sessions. Helps visualize connections between concepts and organize thoughts.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['Undergraduate students', 'Graduate students', 'Knowledge workers'],
     author: {
       name: 'Kael Team',
@@ -467,7 +467,7 @@ export const mockSkills: Skill[] = [
     name: 'Essay Writing Assistant',
     shortDescription: 'Structure and improve academic essays',
     longDescription: 'Helps structure essays with proper thesis statements, topic sentences, and conclusions. Provides feedback on argument strength and writing clarity.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['Undergraduate students', 'Graduate students', 'Writers'],
     author: {
       name: 'Academic Tools',
@@ -495,7 +495,7 @@ export const mockSkills: Skill[] = [
     name: 'Research Hypothesis Generator',
     shortDescription: 'Generate and refine research hypotheses',
     longDescription: 'Helps formulate testable research hypotheses, identify variables, and suggest appropriate research methodologies.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['PhD students', 'Academic researchers', 'Data scientists'],
     author: {
       name: 'Research Pro',
@@ -521,7 +521,7 @@ export const mockSkills: Skill[] = [
     name: 'Grant Writing Assistant',
     shortDescription: 'Write compelling grant proposals',
     longDescription: 'Assists in writing grant proposals with proper structure, impact statements, and budget justifications. Tailored for academic and research grants.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['Academic researchers', 'PhD students', 'Professors'],
     author: {
       name: 'GrantPro',
@@ -549,7 +549,7 @@ export const mockSkills: Skill[] = [
     name: 'Database Schema Designer',
     shortDescription: 'Design optimal database schemas',
     longDescription: 'Creates normalized database schemas with proper relationships, indexes, and constraints. Generates SQL DDL and migration scripts.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Engineers', 'Data scientists', 'Tool makers'],
     author: {
       name: 'DBTools',
@@ -575,7 +575,7 @@ export const mockSkills: Skill[] = [
     name: 'Unit Test Generator',
     shortDescription: 'Generate comprehensive unit tests',
     longDescription: 'Automatically generates unit tests with high coverage. Includes edge cases, mocks, and fixtures for multiple testing frameworks.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Engineers', 'Open source contributors', 'Tool makers'],
     author: {
       name: 'TestCraft',
@@ -603,7 +603,7 @@ export const mockSkills: Skill[] = [
     name: 'Lesson Plan Creator',
     shortDescription: 'Design engaging lesson plans',
     longDescription: 'Creates structured lesson plans with learning objectives, activities, assessments, and differentiation strategies for various subjects and grade levels.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['Teachers', 'Professors', 'Teaching assistants', 'Course designers'],
     author: {
       name: 'EduPlan',
@@ -629,7 +629,7 @@ export const mockSkills: Skill[] = [
     name: 'Assessment Rubric Builder',
     shortDescription: 'Create detailed grading rubrics',
     longDescription: 'Builds comprehensive assessment rubrics with clear criteria, performance levels, and point distributions for any assignment or project.',
-    category: 'Academic',
+    category: 'education',
     audienceTags: ['Teachers', 'Professors', 'Teaching assistants'],
     author: {
       name: 'AssessPro',
@@ -657,7 +657,7 @@ export const mockSkills: Skill[] = [
     name: 'SWOT Analysis Tool',
     shortDescription: 'Strategic SWOT analysis for any business',
     longDescription: 'Conducts thorough SWOT (Strengths, Weaknesses, Opportunities, Threats) analysis with actionable insights and strategic recommendations.',
-    category: 'Business',
+    category: 'productivity',
     audienceTags: ['Consultants', 'Product managers', 'Analysts'],
     author: {
       name: 'StrategyPro',
@@ -683,7 +683,7 @@ export const mockSkills: Skill[] = [
     name: 'Meeting Notes Organizer',
     shortDescription: 'Structure and summarize meeting notes',
     longDescription: 'Transforms meeting transcripts or notes into organized summaries with action items, decisions, and follow-ups clearly identified.',
-    category: 'Business',
+    category: 'productivity',
     audienceTags: ['Knowledge workers', 'Product managers', 'Consultants'],
     author: {
       name: 'MeetingPro',
@@ -711,7 +711,7 @@ export const mockSkills: Skill[] = [
     name: 'Brand Voice Developer',
     shortDescription: 'Create consistent brand voice guidelines',
     longDescription: 'Develops comprehensive brand voice guidelines including tone, personality, language patterns, and examples for consistent communication.',
-    category: 'Marketing',
+    category: 'communication',
     audienceTags: ['Content creators', 'Product managers', 'Writers'],
     author: {
       name: 'BrandCraft',
@@ -737,7 +737,7 @@ export const mockSkills: Skill[] = [
     name: 'Video Script Writer',
     shortDescription: 'Professional video scripts with timing',
     longDescription: 'Creates engaging video scripts with scene descriptions, dialogue, timing markers, and visual cues for YouTube, TikTok, or professional productions.',
-    category: 'Marketing',
+    category: 'communication',
     audienceTags: ['Content creators', 'Indie builders', 'Writers'],
     author: {
       name: 'VideoScript Pro',
@@ -765,7 +765,7 @@ export const mockSkills: Skill[] = [
     name: 'SQL Query Optimizer',
     shortDescription: 'Optimize and explain SQL queries',
     longDescription: 'Analyzes SQL queries for performance issues, suggests optimizations, creates indexes, and explains query execution plans.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Engineers', 'Data scientists', 'Analysts'],
     author: {
       name: 'DataOpt',
@@ -791,7 +791,7 @@ export const mockSkills: Skill[] = [
     name: 'Data Cleaning Assistant',
     shortDescription: 'Clean and prepare datasets for analysis',
     longDescription: 'Identifies and fixes data quality issues including missing values, duplicates, inconsistencies, and format problems. Provides cleaning scripts.',
-    category: 'Programming',
+    category: 'development',
     audienceTags: ['Data scientists', 'Analysts', 'Academic researchers'],
     author: {
       name: 'CleanData Pro',
@@ -817,7 +817,7 @@ export const mockSkills: Skill[] = [
     name: 'Resume & Cover Letter Builder',
     shortDescription: 'Tailor resumes and cover letters to specific roles',
     longDescription: 'Creates role-specific resumes and cover letters with ATS-friendly formatting, bullet rewrites, and measurable impact statements. Includes industry-specific keywords and concise summaries.',
-    category: 'Career',
+    category: 'productivity',
     audienceTags: ['Knowledge workers', 'Undergraduate students', 'Graduate students'],
     author: {
       name: 'CareerLab',
@@ -843,7 +843,7 @@ export const mockSkills: Skill[] = [
     name: 'Personal Wellness Planner',
     shortDescription: 'Build weekly wellness plans with habits, meals, and workouts',
     longDescription: 'Creates balanced wellness routines with habit tracking, meal prep suggestions, and workout schedules. Adapts to your goals, available time, and preferred activity level.',
-    category: 'Health',
+    category: 'other',
     audienceTags: ['Knowledge workers', 'Content creators', 'Indie builders'],
     author: {
       name: 'Wellness Studio',
@@ -869,7 +869,7 @@ export const mockSkills: Skill[] = [
     name: 'Product Mockup Image Generator',
     shortDescription: 'Generate clean product mockups and brand visuals',
     longDescription: 'Produces high-quality image concepts and prompts for product shots, social posts, and app previews. Includes style variants, lighting directions, and background suggestions.',
-    category: 'Image',
+    category: 'creative',
     audienceTags: ['Content creators', 'Indie builders', 'Product managers'],
     author: {
       name: 'VisualForge',
@@ -895,7 +895,7 @@ export const mockSkills: Skill[] = [
     name: 'Prompt Optimizer',
     shortDescription: 'Refine prompts for clearer, more consistent outputs',
     longDescription: 'Analyzes your intent and rewrites prompts with better structure, constraints, and examples. Generates variants for A/B testing and suggests evaluation criteria.',
-    category: 'Prompt',
+    category: 'creative',
     audienceTags: ['Engineers', 'Content creators', 'Product managers'],
     author: {
       name: 'PromptLab',

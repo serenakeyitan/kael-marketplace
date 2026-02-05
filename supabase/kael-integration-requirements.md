@@ -1,6 +1,6 @@
 # Kael.im 集成需求文档
 
-## 一、背景（30秒）
+## 一、背景
 - **产品**：Skill Marketplace (作为 kael.im/marketplace 运行)
 - **功能**：用户浏览、安装、使用 AI 技能
 - **架构**：Marketplace 存技能目录，Kael 存用户安装状态
@@ -107,12 +107,10 @@ CREATE TABLE user_skill_installations (
 
 ## 六、测试场景
 
-### MVP 测试
 1. **Try**：点击 → 跳转 chat → 看到预填 prompt
 2. **查状态**：页面加载 → 调 API → 显示已安装技能
 3. **使用统计**：使用技能 → 发 webhook → 更新计数
 
-### V2 测试
 4. **安装**：点 Install → 重定向 → 安装 → 返回
 5. **验证**：上传 ZIP → 验证 → 显示错误
 
@@ -126,19 +124,6 @@ CREATE TABLE user_skill_installations (
 | Try 需要安装？ | 不需要，只是预填 prompt |
 | 统计需要什么？ | 只需要 skillId + timestamp |
 | 错误信息格式？ | 用户可读，可直接显示在 UI |
-
----
-
-## 八、实施计划
-
-### 第一周：MVP
-- ✅ 支持 ?prefill= 参数
-- ✅ 提供已安装查询 API
-- ✅ Marketplace 实现 webhook 接收端
-
-### 第二周：V2
-- ⏳ 安装重定向流程
-- ⏳ ZIP 验证 API
 
 ---
 
@@ -161,23 +146,3 @@ CREATE TABLE user_skill_installations (
   - 使用统计（skill_events 表）
   - 运行时数据
 
-### Webhook 扩展字段（可选）
-未来如需更详细的统计，可在 webhook 中添加：
-```json
-{
-  "skillId": "uuid",
-  "timestamp": "2026-02-04T10:30:45Z",
-  "success": true,
-  "userId": "uuid",  // 可选：用户级统计
-  "eventId": "uuid",  // 可选：去重用
-  "conversationId": "conv-123"  // 可选：会话追踪
-}
-```
-
----
-
-## 十、联系方式
-
-- Marketplace 负责人：[待填写]
-- 测试环境：kael.im/marketplace
-- 技术问题：[待填写邮箱]

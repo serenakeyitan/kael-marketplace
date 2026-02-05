@@ -733,18 +733,18 @@ export default function SkillDetailPage() {
 
   // Use rating from database (skill.stats contains the actual database values)
   const averageRating = skill.stats.rating || 0;
-  const totalRatings = skill.stats.totalRatings || 0;
+  const totalRatings = reviews.length;
 
   // Generate gradient based on skill category
   const gradientColors = {
-    'Career': 'from-amber-400 to-orange-600',
-    'Health': 'from-emerald-400 to-teal-600',
-    'Academic': 'from-indigo-400 to-purple-600',
-    'Business': 'from-rose-400 to-pink-600',
-    'Programming': 'from-blue-400 to-indigo-600',
-    'Marketing': 'from-fuchsia-400 to-pink-600',
-    'Image': 'from-violet-400 to-fuchsia-600',
-    'Prompt': 'from-cyan-400 to-sky-600',
+    'productivity': 'from-amber-400 to-orange-600',
+    'creative': 'from-purple-400 to-pink-600',
+    'development': 'from-blue-400 to-indigo-600',
+    'research': 'from-indigo-400 to-purple-600',
+    'communication': 'from-cyan-400 to-blue-600',
+    'education': 'from-emerald-400 to-teal-600',
+    'entertainment': 'from-green-400 to-emerald-600',
+    'other': 'from-gray-400 to-gray-600'
   };
   const gradient = gradientColors[skill.category as keyof typeof gradientColors] || 'from-blue-400 to-purple-600';
 

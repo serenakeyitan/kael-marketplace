@@ -44,15 +44,20 @@ interface AddNewSkillModalProps {
 }
 
 const categories: SkillCategory[] = [
-  'Career',
-  'Health',
-  'Academic',
-  'Business',
-  'Programming',
-  'Marketing',
-  'Image',
-  'Prompt',
+  'productivity',
+  'creative',
+  'development',
+  'research',
+  'communication',
+  'education',
+  'entertainment',
+  'other',
 ];
+
+// Helper function to format category names for display
+const formatCategoryDisplay = (category: string) => {
+  return category.charAt(0).toUpperCase() + category.slice(1);
+};
 
 const mockBounties = [
   { id: '1', name: 'AI Research Assistant - $5000' },
@@ -318,7 +323,7 @@ export default function AddNewSkillModal({
                 <SelectContent>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
-                      {category}
+                      {formatCategoryDisplay(category)}
                     </SelectItem>
                   ))}
                 </SelectContent>
