@@ -19,9 +19,8 @@ import {
   FileArchive,
   Image,
   Loader2,
-  CheckCircle
-  ExternalLink,
-  ArrowUpRight
+  CheckCircle,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SignedIn, SignedOut, UserButton } from '@daveyplate/better-auth-ui';
