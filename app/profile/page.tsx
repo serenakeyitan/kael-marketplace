@@ -62,15 +62,6 @@ interface UserStats {
   }[];
 }
 
-interface ActivityItem {
-  id: string;
-  type: 'created' | 'installed' | 'reviewed' | 'achievement';
-  title: string;
-  description: string;
-  timestamp: Date;
-  icon: any;
-}
-
 export default function ProfilePage() {
   const { user, isCreator } = useAuth();
   const { toast } = useToast();
@@ -87,7 +78,6 @@ export default function ProfilePage() {
   });
   const [createdSkills, setCreatedSkills] = useState<any[]>([]);
   const [installedSkills, setInstalledSkills] = useState<any[]>([]);
-  const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
   const [followingList, setFollowingList] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -274,11 +264,6 @@ export default function ProfilePage() {
     ]);
 
     setLoading(false);
-  };
-
-  const getActivityIcon = (item: ActivityItem) => {
-    const Icon = item.icon;
-    return <Icon className="h-4 w-4" />;
   };
 
   return (
@@ -469,41 +454,7 @@ export default function ProfilePage() {
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Recent Activity */}
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>Your latest actions and achievements</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {activityItems.map((item) => (
-                        <div key={item.id} className="flex items-start gap-3">
-                          <div className={cn(
-                            "p-2 rounded-lg",
-                            item.type === 'created' && "bg-purple-100",
-                            item.type === 'installed' && "bg-blue-100",
-                            item.type === 'achievement' && "bg-yellow-100",
-                            item.type === 'reviewed' && "bg-green-100"
-                          )}>
-                            {getActivityIcon(item)}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{item.title}</p>
-                            <p className="text-sm text-muted-foreground">{item.description}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {formatDistanceToNow(item.timestamp, { addSuffix: true })}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
+            <div className="grid grid-cols-1 gap-6">
               {/* Top Achievements */}
               <div>
                 <Card>
