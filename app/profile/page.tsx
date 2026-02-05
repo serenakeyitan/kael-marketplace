@@ -34,7 +34,10 @@ import {
   Plus,
   MoreHorizontal,
   ArrowUpRight,
-  Sparkles
+  Sparkles,
+  Play,
+  Flame,
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -108,7 +111,13 @@ export default function ProfilePage() {
           'Star': Star,
           'Users': Users,
           'TrendingUp': TrendingUp,
-          'Award': Award
+          'Award': Award,
+          'Play': Play,
+          'Activity': Activity,
+          'Flame': Flame,
+          'Package': Package,
+          'MessageSquare': MessageSquare,
+          'Heart': Heart
         };
 
         // Set user stats with proper icon mapping

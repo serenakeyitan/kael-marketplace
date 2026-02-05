@@ -33,6 +33,20 @@ export async function GET() {
       console.error('Error fetching created skills:', createdError);
     }
 
+    // Fetch user's reviews count
+    const { count: reviewsCount } = await supabase
+      .from('reviews')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    // Calculate total skill usage (sum of usage_count from installed_skills)
+    const { data: usageData } = await supabase
+      .from('installed_skills')
+      .select('usage_count')
+      .eq('user_id', userId);
+
+    const totalUsageCount = usageData?.reduce((sum, item) => sum + (item.usage_count || 0), 0) || 0;
+
     // Calculate stats from created skills
     let totalInstalls = 0;
     let totalConversations = 0;
@@ -54,6 +68,7 @@ export async function GET() {
 
     // Calculate achievements based on realistic thresholds
     const achievements = [
+      // Installation achievements
       {
         id: '1',
         title: 'First Steps',
@@ -78,29 +93,80 @@ export async function GET() {
         unlocked: (installedCount || 0) >= 10,
         progress: Math.min(100, ((installedCount || 0) / 10) * 100)
       },
+      // Usage achievements
       {
         id: '4',
+        title: 'First Use',
+        description: 'Use your first skill',
+        icon: 'Play',
+        unlocked: totalUsageCount >= 1,
+        progress: Math.min(100, totalUsageCount * 100)
+      },
+      {
+        id: '5',
+        title: 'Active User',
+        description: 'Use skills 5 times',
+        icon: 'Activity',
+        unlocked: totalUsageCount >= 5,
+        progress: Math.min(100, (totalUsageCount / 5) * 100)
+      },
+      {
+        id: '6',
+        title: 'Power Player',
+        description: 'Use skills 20 times',
+        icon: 'Flame',
+        unlocked: totalUsageCount >= 20,
+        progress: Math.min(100, (totalUsageCount / 20) * 100)
+      },
+      // Creation achievements
+      {
+        id: '7',
         title: 'Skill Creator',
-        description: 'Create your first skill',
+        description: 'Upload your first skill',
         icon: 'Code',
         unlocked: (createdSkills?.length || 0) >= 1,
         progress: Math.min(100, (createdSkills?.length || 0) * 100)
       },
       {
-        id: '5',
+        id: '8',
+        title: 'Prolific Creator',
+        description: 'Upload 3 skills',
+        icon: 'Package',
+        unlocked: (createdSkills?.length || 0) >= 3,
+        progress: Math.min(100, ((createdSkills?.length || 0) / 3) * 100)
+      },
+      {
+        id: '9',
         title: 'Rising Star',
         description: 'Get 100+ installs on your skills',
         icon: 'Star',
         unlocked: totalInstalls >= 100,
         progress: Math.min(100, (totalInstalls / 100) * 100)
       },
+      // Community achievements
       {
-        id: '6',
-        title: 'Community Contributor',
-        description: 'Create 3 skills',
+        id: '10',
+        title: 'First Review',
+        description: 'Post your first review',
+        icon: 'MessageSquare',
+        unlocked: (reviewsCount || 0) >= 1,
+        progress: Math.min(100, (reviewsCount || 0) * 100)
+      },
+      {
+        id: '11',
+        title: 'Reviewer',
+        description: 'Post 5 reviews',
+        icon: 'Heart',
+        unlocked: (reviewsCount || 0) >= 5,
+        progress: Math.min(100, ((reviewsCount || 0) / 5) * 100)
+      },
+      {
+        id: '12',
+        title: 'Community Voice',
+        description: 'Post 10 reviews',
         icon: 'Users',
-        unlocked: (createdSkills?.length || 0) >= 3,
-        progress: Math.min(100, ((createdSkills?.length || 0) / 3) * 100)
+        unlocked: (reviewsCount || 0) >= 10,
+        progress: Math.min(100, ((reviewsCount || 0) / 10) * 100)
       }
     ];
 

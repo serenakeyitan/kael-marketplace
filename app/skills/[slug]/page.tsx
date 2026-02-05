@@ -434,7 +434,16 @@ export default function SkillDetailPage() {
     localStorage.setItem('skillsUpdated', 'true');
   };
 
-  const handleUseInKael = () => {
+  const handleUseInKael = async () => {
+    // Track skill usage for achievements
+    try {
+      await fetch(`/api/skills/${params.slug}/use`, {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Failed to track skill usage:', error);
+    }
+
     toast({
       title: 'Opening in Kael',
       description: `Loading ${skill?.name} in Kael chat...`,
