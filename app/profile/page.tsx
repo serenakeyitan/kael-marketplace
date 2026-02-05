@@ -50,6 +50,8 @@ interface UserStats {
   totalUsage: number;
   totalInstalls: number;
   averageRating: number;
+  followers: number;
+  following: number;
   achievements: {
     id: string;
     title: string;
@@ -79,6 +81,8 @@ export default function ProfilePage() {
     totalUsage: 45230,
     totalInstalls: 12500,
     averageRating: 4.7,
+    followers: 0,
+    following: 0,
     achievements: []
   });
   const [createdSkills, setCreatedSkills] = useState<any[]>([]);
@@ -306,8 +310,8 @@ export default function ProfilePage() {
                 <h1 className="text-3xl font-bold mb-1">{user?.name || 'User'}</h1>
                 <p className="text-white/90 mb-2">@{user?.email?.split('@')[0] || 'username'}</p>
                 <div className="flex items-center gap-4 text-white/90 mb-3">
-                  <span className="font-semibold">0 <span className="font-normal">followers</span></span>
-                  <span className="font-semibold">{followingList.length} <span className="font-normal">following</span></span>
+                  <span className="font-semibold">{userStats.followers || 0} <span className="font-normal">followers</span></span>
+                  <span className="font-semibold">{userStats.following || 0} <span className="font-normal">following</span></span>
                 </div>
                 <div className="flex items-center gap-4">
                   {isCreator && (

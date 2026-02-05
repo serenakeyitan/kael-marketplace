@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getServerSession } from '@/lib/auth-server';
 
 export async function GET(
   request: NextRequest,
@@ -113,11 +114,41 @@ export async function GET(
       });
     }
 
-    // Get follower/following counts (for now, use default values)
-    // These will be updated when we implement the follow system
-    const followers = 626;
-    const following = 2;
-    const isFollowing = false;
+    // Get follower/following counts from database
+    const { count: followersCount } = await supabase
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('following_id', userProfile.id);
+
+    const { count: followingCount } = await supabase
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('follower_id', userProfile.id);
+
+    const followers = followersCount || 0;
+    const following = followingCount || 0;
+
+    // Check if current user is following this profile
+    let isFollowing = false;
+    const session = await getServerSession();
+    if (session?.user) {
+      const { data: currentUserProfile } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('better_auth_id', session.user.id)
+        .single();
+
+      if (currentUserProfile) {
+        const { data: followData } = await supabase
+          .from('follows')
+          .select('id')
+          .eq('follower_id', currentUserProfile.id)
+          .eq('following_id', userProfile.id)
+          .single();
+
+        isFollowing = !!followData;
+      }
+    }
 
     // Transform skills to match frontend format
     const transformedSkills = (skills || []).map(skill => ({
@@ -129,9 +160,9 @@ export async function GET(
       category: skill.category,
       audienceTags: skill.tags || [],
       author: {
-        name: userProfile.name,
+        name: userProfile.display_name || userProfile.username,
         username: userProfile.username,
-        avatar: userProfile.avatar,
+        avatar: userProfile.avatar_url,
         isOfficial: false
       },
       stats: {
@@ -150,8 +181,8 @@ export async function GET(
       profile: {
         id: userProfile.id,
         username: userProfile.username,
-        name: userProfile.name,
-        avatar: userProfile.avatar,
+        name: userProfile.display_name || userProfile.username,
+        avatar: userProfile.avatar_url,
         description: userProfile.bio || 'Independent researcher on AI skills and prompt engineering. Building the future of automation.',
         followers,
         following,

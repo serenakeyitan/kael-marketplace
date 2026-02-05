@@ -66,6 +66,31 @@ export async function GET() {
 
     const averageRating = totalRatings > 0 ? sumRatings / totalRatings : 0;
 
+    // Get follower/following counts
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('better_auth_id', userId)
+      .single();
+
+    let followers = 0;
+    let following = 0;
+
+    if (userProfile) {
+      const { count: followersCount } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', userProfile.id);
+
+      const { count: followingCount } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', userProfile.id);
+
+      followers = followersCount || 0;
+      following = followingCount || 0;
+    }
+
     // Calculate achievements based on realistic thresholds
     const achievements = [
       // Installation achievements
@@ -193,6 +218,8 @@ export async function GET() {
         totalUsage: totalConversations,
         totalInstalls: totalInstalls,
         averageRating: averageRating,
+        followers: followers,
+        following: following,
         achievements: achievements
       },
       createdSkills: transformedCreatedSkills

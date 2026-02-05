@@ -98,14 +98,41 @@ export default function UserProfilePage() {
     }
   };
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    toast({
-      title: isFollowing ? 'Unfollowed' : 'Followed',
-      description: isFollowing
-        ? `You unfollowed ${profile?.name}`
-        : `You are now following ${profile?.name}`,
-    });
+  const handleFollow = async () => {
+    try {
+      const method = isFollowing ? 'DELETE' : 'POST';
+      const response = await fetch(`/api/users/${username}/follow`, {
+        method,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update follow status');
+      }
+
+      setIsFollowing(!isFollowing);
+
+      // Update follower count locally
+      if (profile) {
+        setProfile({
+          ...profile,
+          followers: isFollowing ? profile.followers - 1 : profile.followers + 1
+        });
+      }
+
+      toast({
+        title: isFollowing ? 'Unfollowed' : 'Followed',
+        description: isFollowing
+          ? `You unfollowed ${profile?.name}`
+          : `You are now following ${profile?.name}`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update follow status',
+        variant: 'destructive',
+      });
+    }
   };
 
   const formatNumber = (num: number) => {
