@@ -28,6 +28,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthModal } from '@/hooks/use-auth-modal';
 import AddNewSkillModal from '@/components/AddNewSkillModal';
 
 interface SidebarProps {
@@ -43,8 +44,9 @@ const navigation = [
 export default function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isCreator } = useAuth();
+  const { isCreator, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { openAuthModal } = useAuthModal();
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
   // Real recent and favorites data
@@ -133,6 +135,10 @@ export default function Sidebar({ className }: SidebarProps) {
   }, []);
 
   const handleCreateClick = () => {
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to create a skill');
+      return;
+    }
     setIsAddSkillModalOpen(true);
   };
 
@@ -175,7 +181,7 @@ export default function Sidebar({ className }: SidebarProps) {
 
           {isCreator && (
             <button
-              onClick={() => setIsAddSkillModalOpen(true)}
+              onClick={handleCreateClick}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100"
               )}
