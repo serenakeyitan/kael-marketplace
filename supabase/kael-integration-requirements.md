@@ -33,6 +33,7 @@ Body:
 {
   "skillId": "uuid",
   "timestamp": "2026-02-04T10:30:45Z",
+  "userId":"userid",
   "success": true
 }
 ```

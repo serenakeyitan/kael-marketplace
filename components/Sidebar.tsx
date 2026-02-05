@@ -20,7 +20,8 @@ import {
   Image,
   Loader2,
   CheckCircle,
-  ExternalLink
+  ExternalLink,
+  ArrowUpRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SignedIn, SignedOut, UserButton } from '@daveyplate/better-auth-ui';

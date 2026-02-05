@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getServerSession } from '@/lib/auth-server';
+import { generateSlugWithSuffix, sanitizeSlug } from '@/lib/slug-utils';
 
 export const dynamic = 'force-dynamic'; // Disable caching
 
@@ -127,36 +129,97 @@ export async function POST(request: Request) {
       }
     }
 
-    // Check if slug already exists
-    const { data: existingSkill } = await supabase
-      .from('skills')
-      .select('id')
-      .eq('slug', body.slug)
+    // Get current user session
+    const session = await getServerSession();
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Authentication required to create skills' },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
+
+    // Fetch user profile to get username and other details
+    const { data: userProfile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('id, username, display_name, avatar_url')
+      .eq('better_auth_id', userId)
       .single();
 
-    if (existingSkill) {
+    if (profileError || !userProfile) {
+      console.error('Error fetching user profile:', profileError);
+      // Fallback if profile not found - use email-based username
+      const fallbackUsername = session.user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user';
+      const userProfileFallback = {
+        id: userId,
+        username: fallbackUsername,
+        display_name: session.user.name || session.user.email || 'User',
+        avatar_url: session.user.image || null,
+      };
+
+      // Use fallback profile
+      Object.assign(userProfile || {}, userProfileFallback);
+    }
+
+    // Sanitize the base slug
+    let baseSlug = sanitizeSlug(body.slug);
+    let finalSlug = baseSlug;
+    let attempt = 0;
+    const maxAttempts = 10;
+    let slugModified = false;
+
+    // Try to find a unique slug with retry logic
+    while (attempt < maxAttempts) {
+      // Generate slug for this attempt
+      finalSlug = generateSlugWithSuffix(baseSlug, userProfile?.username || null, attempt);
+
+      // Check if this slug already exists
+      const { data: existingSkill } = await supabase
+        .from('skills')
+        .select('id')
+        .eq('slug', finalSlug)
+        .single();
+
+      if (!existingSkill) {
+        // Slug is available, we can use it
+        if (attempt > 0) {
+          slugModified = true;
+        }
+        break;
+      }
+
+      // Slug exists, try next attempt
+      attempt++;
+    }
+
+    // If we exhausted all attempts, return error
+    if (attempt >= maxAttempts) {
       return NextResponse.json(
-        { error: 'A skill with this slug already exists' },
+        {
+          error: `Could not generate a unique slug after ${maxAttempts} attempts. Please try a different name.`,
+          suggestedSlug: `${baseSlug}-${userProfile?.username}-${Date.now()}`
+        },
         { status: 409 }
       );
     }
 
-    // Create new skill in database
+    // Create new skill in database with the final unique slug
     const { data: newSkill, error } = await supabase
       .from('skills')
       .insert({
-        slug: body.slug,
+        slug: finalSlug,
         name: body.name,
         description: body.shortDescription,
         documentation: body.longDescription || body.shortDescription,
         category: body.category,
         tags: body.audienceTags,
-        // For now, use placeholder author data
-        // This will be replaced with actual user data from Better Auth
-        author_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', // Placeholder user ID
-        author_name: body.authorName || 'Current User',
-        author_username: body.authorUsername || 'currentuser',
-        author_avatar: body.authorAvatar || null,
+        // Use real user data from profile
+        author_id: userProfile?.id || userId,
+        author_name: userProfile?.display_name || session.user.name || 'User',
+        author_username: userProfile?.username || 'user',
+        author_avatar: userProfile?.avatar_url || session.user.image || null,
         github_url: body.githubUrl || null,
         icon: body.icon || null,
         is_published: true,
@@ -200,21 +263,30 @@ export async function POST(request: Request) {
       icon: newSkill.icon,
     };
 
-    // If user is logged in, also install the skill for them
-    // This will be implemented when we integrate Better Auth
-    if (body.autoInstall && body.userId) {
-      await supabase
-        .from('installed_skills')
-        .insert({
-          user_id: body.userId,
-          skill_id: newSkill.id,
-          enabled: true,
-        });
+    // Auto-install the skill for the creator
+    if (body.autoInstall !== false) { // Default to true
+      try {
+        await supabase
+          .from('installed_skills')
+          .insert({
+            user_id: userProfile?.id || userId,
+            skill_id: newSkill.id,
+            enabled: true,
+          });
+      } catch (installError) {
+        console.error('Error auto-installing skill:', installError);
+        // Don't fail the whole request if auto-install fails
+      }
     }
 
     return NextResponse.json({
       skill: transformedSkill,
-      message: 'Skill created successfully',
+      message: slugModified
+        ? `Skill created successfully with slug "${finalSlug}" (name was adjusted for uniqueness)`
+        : 'Skill created successfully',
+      slugModified,
+      originalSlug: baseSlug,
+      finalSlug,
     }, { status: 201 });
   } catch (error) {
     console.error('Unexpected error:', error);
