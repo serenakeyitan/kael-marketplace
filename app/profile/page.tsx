@@ -85,6 +85,7 @@ export default function ProfilePage() {
   const [installedSkills, setInstalledSkills] = useState<any[]>([]);
   const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
   const [followingList, setFollowingList] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
@@ -303,7 +304,11 @@ export default function ProfilePage() {
               </Avatar>
               <div className="text-white">
                 <h1 className="text-3xl font-bold mb-1">{user?.name || 'User'}</h1>
-                <p className="text-white/90 mb-3">@{user?.email?.split('@')[0] || 'username'}</p>
+                <p className="text-white/90 mb-2">@{user?.email?.split('@')[0] || 'username'}</p>
+                <div className="flex items-center gap-4 text-white/90 mb-3">
+                  <span className="font-semibold">0 <span className="font-normal">followers</span></span>
+                  <span className="font-semibold">{followingList.length} <span className="font-normal">following</span></span>
+                </div>
                 <div className="flex items-center gap-4">
                   {isCreator && (
                     <Badge className="bg-white/20 text-white border-white/30 backdrop-blur">
@@ -359,7 +364,11 @@ export default function ProfilePage() {
                       <Activity className="h-4 w-4 text-orange-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{(userStats.totalUsage / 1000).toFixed(0)}k</p>
+                      <p className="text-2xl font-bold">
+                        {userStats.totalUsage >= 1000
+                          ? `${(userStats.totalUsage / 1000).toFixed(1)}k`
+                          : userStats.totalUsage}
+                      </p>
                       <p className="text-sm text-muted-foreground">Your Total Usage</p>
                     </div>
                   </div>
@@ -372,7 +381,7 @@ export default function ProfilePage() {
                       <Heart className="h-4 w-4 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">12</p>
+                      <p className="text-2xl font-bold">{favorites.length}</p>
                       <p className="text-sm text-muted-foreground">Favorite Skills</p>
                     </div>
                   </div>
