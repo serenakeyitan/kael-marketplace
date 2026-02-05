@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -9,22 +9,27 @@ import {
   Trophy,
   Gift,
   Plus,
-  Settings,
-  LogOut,
   User,
   Sparkles,
-  TrendingUp,
   Clock,
   Heart,
+  ArrowUpRight,
+  Upload,
+  Code2,
+  FileArchive,
+  Image,
+  Loader2,
+  CheckCircle,
   ExternalLink,
   ArrowUpRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { SignedIn, SignedOut, UserButton } from '@daveyplate/better-auth-ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthModal } from '@/hooks/use-auth-modal';
 import AddNewSkillModal from '@/components/AddNewSkillModal';
 
 interface SidebarProps {
@@ -40,29 +45,101 @@ const navigation = [
 export default function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isCreator } = useAuth();
+  const { isCreator, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { openAuthModal } = useAuthModal();
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
-  // Mock recent and favorites data - connected to API
-  const [recentSkills] = useState([
-    { id: '1', name: 'Literature Review', slug: 'literature-review' },
-    { id: '2', name: 'Code Reviewer', slug: 'code-reviewer' },
-    { id: '3', name: 'Data Analysis', slug: 'data-analysis' }
-  ]);
+  // Real recent and favorites data
+  const [recentSkills, setRecentSkills] = useState<any[]>([]);
+  const [favoriteSkills, setFavoriteSkills] = useState<any[]>([]);
 
-  const [favoriteSkills] = useState([
-    { id: '1', name: 'Flashcards', slug: 'flashcards' },
-    { id: '2', name: 'Mind Mapper', slug: 'mind-mapper' },
-    { id: '3', name: 'Essay Assistant', slug: 'essay-assistant' },
-    { id: '4', name: 'Code Reviewer', slug: 'code-reviewer' },
-    { id: '5', name: 'Quiz Generator', slug: 'quiz-generator' },
-    { id: '6', name: 'Creative Writing', slug: 'creative-writing' },
-    { id: '7', name: 'Citation Checker', slug: 'citation-checker' },
-    { id: '8', name: 'Business Plan', slug: 'business-plan' }
-  ]);
+  // Load recent skills from database and favorites
+  useEffect(() => {
+    const loadRecentSkills = async () => {
+      // First try to load from database
+      try {
+        const response = await fetch('/api/recent-skills');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.skills && data.skills.length > 0) {
+            setRecentSkills(data.skills.slice(0, 3)); // Only show top 3
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading recent skills from database:', error);
+      }
+
+      // Fall back to localStorage for anonymous users or if database fails
+      const stored = localStorage.getItem('recentSkills');
+      if (stored) {
+        try {
+          const skills = JSON.parse(stored);
+          setRecentSkills(skills.slice(0, 3)); // Only show top 3
+        } catch (e) {
+          console.error('Error loading recent skills from localStorage:', e);
+        }
+      }
+    };
+
+    const loadFavoriteSkills = async () => {
+      // First try to load from database
+      try {
+        const response = await fetch('/api/liked-skills');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.skills && data.skills.length > 0) {
+            setFavoriteSkills(data.skills);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading favorite skills from database:', error);
+      }
+
+      // Fall back to localStorage for anonymous users or if database fails
+      const likedSkillIds = JSON.parse(localStorage.getItem('likedSkills') || '[]');
+      if (likedSkillIds.length > 0) {
+        try {
+          // Fetch skill details for liked skills
+          const response = await fetch('/api/skills?limit=100');
+          if (response.ok) {
+            const data = await response.json();
+            const likedSkillsData = data.skills.filter((skill: any) =>
+              likedSkillIds.includes(skill.id)
+            );
+            setFavoriteSkills(likedSkillsData);
+          }
+        } catch (error) {
+          console.error('Error loading favorite skills from localStorage:', error);
+        }
+      }
+    };
+
+    loadRecentSkills();
+    loadFavoriteSkills();
+
+    // Listen for storage changes
+    const handleStorageChange = () => {
+      loadRecentSkills();
+      loadFavoriteSkills();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('skillsUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('skillsUpdated', handleStorageChange);
+    };
+  }, []);
 
   const handleCreateClick = () => {
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to create a skill');
+      return;
+    }
     setIsAddSkillModalOpen(true);
   };
 
@@ -105,7 +182,7 @@ export default function Sidebar({ className }: SidebarProps) {
 
           {isCreator && (
             <button
-              onClick={() => setIsAddSkillModalOpen(true)}
+              onClick={handleCreateClick}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100"
               )}
@@ -166,16 +243,20 @@ export default function Sidebar({ className }: SidebarProps) {
             Recent
           </h3>
           <div className="space-y-1">
-            {recentSkills.slice(0, 3).map((skill) => (
-              <Link
-                key={skill.id}
-                href={`/skills/${skill.slug}`}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                <Clock className="h-4 w-4 text-gray-400" />
-                <span className="truncate">{skill.name}</span>
-              </Link>
-            ))}
+            {recentSkills.length > 0 ? (
+              recentSkills.slice(0, 3).map((skill) => (
+                <Link
+                  key={skill.id}
+                  href={`/skills/${skill.slug}`}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <span className="truncate">{skill.name}</span>
+                </Link>
+              ))
+            ) : (
+              <p className="px-3 py-2 text-sm text-gray-400 italic">No recent skills</p>
+            )}
           </div>
         </div>
 
@@ -185,41 +266,46 @@ export default function Sidebar({ className }: SidebarProps) {
             Favorites
           </h3>
           <div className="max-h-48 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-            {favoriteSkills.map((skill) => (
-              <Link
-                key={skill.id}
-                href={`/skills/${skill.slug}`}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                <Heart className="h-4 w-4 text-red-400" />
-                <span className="truncate">{skill.name}</span>
-              </Link>
-            ))}
+            {favoriteSkills.length > 0 ? (
+              favoriteSkills.map((skill) => (
+                <Link
+                  key={skill.id}
+                  href={`/skills/${skill.slug}`}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <Heart className="h-4 w-4 text-red-400" />
+                  <span className="truncate">{skill.name}</span>
+                </Link>
+              ))
+            ) : (
+              <p className="px-3 py-2 text-sm text-gray-400 italic">No favorite skills</p>
+            )}
           </div>
         </div>
       </div>
 
       {/* User Section */}
       <div className="p-3 border-t bg-white">
-        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.avatar} />
-            <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-              {user?.name?.charAt(0) || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.name || 'User'}</p>
-            <p className="text-xs text-gray-500 truncate">{user?.email || 'user@example.com'}</p>
-          </div>
-          <Button
+        <SignedIn>
+          <UserButton
+            size="default"
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700"
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
-        </div>
+            className="w-full justify-between rounded-lg hover:bg-gray-50"
+            align="start"
+            side="top"
+            sideOffset={8}
+          />
+        </SignedIn>
+        <SignedOut>
+          <Link href="/auth/sign-in" className="block">
+            <Button
+              variant="ghost"
+              className="w-full justify-between rounded-lg hover:bg-gray-50"
+            >
+              <span className="text-sm font-medium">Sign in</span>
+            </Button>
+          </Link>
+        </SignedOut>
       </div>
 
       {/* Add New Skill Modal */}

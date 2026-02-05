@@ -1,12 +1,12 @@
 export type SkillCategory =
-  | 'Career'
-  | 'Health'
-  | 'Academic'
-  | 'Business'
-  | 'Programming'
-  | 'Marketing'
-  | 'Image'
-  | 'Prompt';
+  | 'productivity'
+  | 'creative'
+  | 'development'
+  | 'research'
+  | 'communication'
+  | 'education'
+  | 'entertainment'
+  | 'other';
 
 export type AudienceTag =
   // Students
@@ -64,6 +64,7 @@ export interface Skill {
   features?: string[];
   requirements?: string[];
   icon?: string;
+  githubUrl?: string;
 }
 
 export interface InstalledSkill {

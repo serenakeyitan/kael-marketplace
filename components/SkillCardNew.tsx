@@ -88,14 +88,14 @@ export default function SkillCardNew({ skill, onUseSkill, initialLiked = false, 
 
   // Generate a gradient background for the card based on category
   const gradientMap: Record<string, string> = {
-    'Career': 'from-amber-500 to-orange-600',
-    'Health': 'from-emerald-500 to-teal-600',
-    'Academic': 'from-indigo-500 to-purple-600',
-    'Business': 'from-rose-500 to-pink-600',
-    'Programming': 'from-blue-500 to-indigo-600',
-    'Marketing': 'from-fuchsia-500 to-pink-600',
-    'Image': 'from-violet-500 to-fuchsia-600',
-    'Prompt': 'from-cyan-500 to-sky-600',
+    'productivity': 'from-amber-500 to-orange-600',
+    'creative': 'from-purple-500 to-pink-600',
+    'development': 'from-blue-500 to-indigo-600',
+    'research': 'from-indigo-500 to-purple-600',
+    'communication': 'from-cyan-500 to-sky-600',
+    'education': 'from-emerald-500 to-teal-600',
+    'entertainment': 'from-green-500 to-emerald-600',
+    'other': 'from-gray-500 to-gray-600'
   };
   const gradient = gradientMap[skill.category] || 'from-blue-500 to-purple-600';
 

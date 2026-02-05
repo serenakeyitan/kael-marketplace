@@ -18,6 +18,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAuthModal } from '@/hooks/use-auth-modal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,20 +43,22 @@ interface UserProfile {
 
 const skillCategories = [
   'All',
-  'Career',
-  'Health',
-  'Academic',
-  'Business',
-  'Programming',
-  'Marketing',
-  'Image',
-  'Prompt'
+  'productivity',
+  'creative',
+  'development',
+  'research',
+  'communication',
+  'education',
+  'entertainment',
+  'other'
 ];
 
 export default function UserProfilePage() {
   const params = useParams();
   const username = params.username as string;
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,181 +73,25 @@ export default function UserProfilePage() {
   const fetchUserProfile = async () => {
     setLoading(true);
     try {
-      // Simulate API call - In production, this would fetch real user data
-      const mockProfile: UserProfile = {
-        id: '1',
-        username: username,
-        name: username === 'the-glitch' ? 'The Glitch' : username.replace(/-/g, ' '),
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-        description: 'Independent researcher on AI skills and prompt engineering. Building the future of automation.',
-        followers: 626,
-        following: 2,
-        totalUsers: 2300000,
-        popularity: 5000000,
-        isFollowing: false,
-        skills: []
-      };
+      const response = await fetch(`/api/users/${username}`);
 
-      // Mock skills data
-      const mockSkills = [
-        {
-          id: '1',
-          name: 'NarutorPG',
-          slug: 'narutorpg',
-          shortDescription: 'You can play RPG-style adventures set in the Naruto universe',
-          longDescription: '',
-          category: 'Academic',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 13000,
-            totalConversations: 0,
-            rating: 4.8
-          }
-        },
-        {
-          id: '2',
-          name: 'R.Em GPT Unblocker',
-          slug: 'rem-gpt-unblocker',
-          shortDescription: 'Unlock all the potential hidden in GPT. It is R.Em 1.0 - GPT with no rules',
-          longDescription: '',
-          category: 'Programming',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 228700,
-            totalConversations: 0,
-            rating: 4.9
-          }
-        },
-        {
-          id: '3',
-          name: 'Dungeons & Dragons Assistant',
-          slug: 'creative-writing',
-          shortDescription: 'This prompt will immerse you in a detailed DnD adventure',
-          longDescription: '',
-          category: 'Business',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 189000,
-            totalConversations: 0,
-            rating: 4.7
-          }
-        },
-        {
-          id: '4',
-          name: 'EssayGPT',
-          slug: 'essay-gpt',
-          shortDescription: 'This prompt will help you with your academic writing and essays',
-          longDescription: '',
-          category: 'Academic',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 591900,
-            totalConversations: 0,
-            rating: 4.6
-          }
-        },
-        {
-          id: '5',
-          name: 'Any Prompt Generator',
-          slug: 'any-prompt-generator',
-          shortDescription: 'This prompt generates any kind of prompt that is realistic',
-          longDescription: '',
-          category: 'Prompt',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 169000,
-            totalConversations: 0,
-            rating: 4.5
-          }
-        },
-        {
-          id: '6',
-          name: 'Jiraiya - Toad Sage Training',
-          slug: 'jiraiya-training',
-          shortDescription: 'You can use this prompt to be trained directly by Jiraiya',
-          longDescription: '',
-          category: 'Academic',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 201800,
-            totalConversations: 0,
-            rating: 4.9
-          }
-        },
-        {
-          id: '7',
-          name: 'Dragon Ball GPT - A What If Adventure',
-          slug: 'dragon-ball-gpt',
-          shortDescription: 'A What If adventure. You are now Akira, a saiyan born on Planet Vegeta',
-          longDescription: '',
-          category: 'Marketing',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 50400,
-            totalConversations: 0,
-            rating: 4.7
-          }
-        },
-        {
-          id: '8',
-          name: 'PokedexGPT',
-          slug: 'pokedex-gpt',
-          shortDescription: 'This works as a pokedex: you can enter any name or descriptor of a pokemon',
-          longDescription: '',
-          category: 'Image',
-          author: {
-            name: mockProfile.name,
-            username: mockProfile.username,
-            avatar: mockProfile.avatar,
-            isOfficial: false
-          },
-          stats: {
-            installs: 87900,
-            totalConversations: 0,
-            rating: 4.8
-          }
-        }
-      ];
+      if (!response.ok) {
+        console.error('Failed to fetch user profile:', response.status);
+        setProfile(null);
+        return;
+      }
 
-      mockProfile.skills = mockSkills as Skill[];
-      setProfile(mockProfile);
-      setIsFollowing(mockProfile.isFollowing);
+      const data = await response.json();
+
+      if (data.profile) {
+        setProfile(data.profile);
+        setIsFollowing(data.profile.isFollowing || false);
+      } else {
+        setProfile(null);
+      }
     } catch (error) {
+      console.error('Error fetching user profile:', error);
+      setProfile(null);
       toast({
         title: 'Error',
         description: 'Failed to load user profile',
@@ -254,14 +102,47 @@ export default function UserProfilePage() {
     }
   };
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    toast({
-      title: isFollowing ? 'Unfollowed' : 'Followed',
-      description: isFollowing
-        ? `You unfollowed ${profile?.name}`
-        : `You are now following ${profile?.name}`,
-    });
+  const handleFollow = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to follow this user');
+      return;
+    }
+
+    try {
+      const method = isFollowing ? 'DELETE' : 'POST';
+      const response = await fetch(`/api/users/${username}/follow`, {
+        method,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update follow status');
+      }
+
+      setIsFollowing(!isFollowing);
+
+      // Update follower count locally
+      if (profile) {
+        setProfile({
+          ...profile,
+          followers: isFollowing ? profile.followers - 1 : profile.followers + 1
+        });
+      }
+
+      toast({
+        title: isFollowing ? 'Unfollowed' : 'Followed',
+        description: isFollowing
+          ? `You unfollowed ${profile?.name}`
+          : `You are now following ${profile?.name}`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update follow status',
+        variant: 'destructive',
+      });
+    }
   };
 
   const formatNumber = (num: number) => {
@@ -315,7 +196,7 @@ export default function UserProfilePage() {
             <Avatar className="h-24 w-24 border-4 border-gray-100">
               <AvatarImage src={profile.avatar} />
               <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                {profile.name.charAt(0)}
+                {profile.name ? profile.name.charAt(0) : profile.username?.charAt(0) || '?'}
               </AvatarFallback>
             </Avatar>
 

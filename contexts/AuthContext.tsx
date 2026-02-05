@@ -1,6 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
+import { useAuthSync } from '@/hooks/use-auth-sync';
 
 export type UserRole = 'user' | 'creator';
 
@@ -23,44 +26,66 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+type SessionUser = {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  avatar?: string | null;
+  role?: unknown;
+  metadata?: { role?: unknown } | null;
+};
+
+function resolveUserRole(user: SessionUser | undefined): UserRole | null {
+  if (!user) {
+    return null;
+  }
+
+  const rawRole = user.role ?? user.metadata?.role;
+  return rawRole === 'creator' || rawRole === 'user' ? rawRole : null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+  const session = useAuthSync(); // This also syncs the user to Supabase
+  const [roleOverride, setRoleOverride] = useState<UserRole | null>(null);
 
   useEffect(() => {
-    // Auto-login for demo purposes
-    const mockUser: User = {
-      id: '1',
-      name: 'Demo User',
-      email: 'demo@kael.im',
-      role: 'user',
-    };
-    setUser(mockUser);
-  }, []);
+    setRoleOverride(null);
+  }, [session?.user?.id]);
 
-  const login = (role: UserRole = 'user') => {
-    const mockUser: User = {
-      id: '1',
-      name: role === 'creator' ? 'Demo Creator' : 'Demo User',
-      email: role === 'creator' ? 'creator@kael.im' : 'user@kael.im',
-      role,
+  const sessionUser = session?.user as SessionUser | undefined;
+  const baseRole = resolveUserRole(sessionUser) ?? 'user';
+  const user = useMemo<User | null>(() => {
+    if (!sessionUser) {
+      return null;
+    }
+
+    return {
+      id: sessionUser.id,
+      name: sessionUser.name ?? sessionUser.email ?? 'User',
+      email: sessionUser.email ?? '',
+      avatar: sessionUser.image ?? sessionUser.avatar ?? undefined,
+      role: roleOverride ?? baseRole,
     };
-    setUser(mockUser);
+  }, [baseRole, roleOverride, sessionUser]);
+
+  const login = (_role: UserRole = 'user') => {
+    router.push('/auth/sign-in');
   };
 
   const logout = () => {
-    setUser(null);
+    void authClient.signOut();
   };
 
   const switchRole = () => {
-    if (user) {
-      const newRole: UserRole = user.role === 'user' ? 'creator' : 'user';
-      setUser({
-        ...user,
-        role: newRole,
-        name: newRole === 'creator' ? 'Demo Creator' : 'Demo User',
-        email: newRole === 'creator' ? 'creator@kael.im' : 'user@kael.im',
-      });
+    if (!sessionUser) {
+      return;
     }
+    setRoleOverride((current) => {
+      const role = current ?? baseRole;
+      return role === 'creator' ? 'user' : 'creator';
+    });
   };
 
   const value: AuthContextType = {

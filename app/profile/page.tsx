@@ -33,7 +33,11 @@ import {
   ExternalLink,
   Plus,
   MoreHorizontal,
-  ArrowUpRight
+  ArrowUpRight,
+  Sparkles,
+  Play,
+  Flame,
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -46,6 +50,8 @@ interface UserStats {
   totalUsage: number;
   totalInstalls: number;
   averageRating: number;
+  followers: number;
+  following: number;
   achievements: {
     id: string;
     title: string;
@@ -54,15 +60,6 @@ interface UserStats {
     unlocked: boolean;
     progress?: number;
   }[];
-}
-
-interface ActivityItem {
-  id: string;
-  type: 'created' | 'installed' | 'reviewed' | 'achievement';
-  title: string;
-  description: string;
-  timestamp: Date;
-  icon: any;
 }
 
 export default function ProfilePage() {
@@ -75,12 +72,14 @@ export default function ProfilePage() {
     totalUsage: 45230,
     totalInstalls: 12500,
     averageRating: 4.7,
+    followers: 0,
+    following: 0,
     achievements: []
   });
   const [createdSkills, setCreatedSkills] = useState<any[]>([]);
   const [installedSkills, setInstalledSkills] = useState<any[]>([]);
-  const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
   const [followingList, setFollowingList] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
@@ -91,124 +90,102 @@ export default function ProfilePage() {
   const fetchUserData = async () => {
     setLoading(true);
 
-    // Mock data
-    setUserStats({
-      skillsCreated: 5,
-      skillsInstalled: 23,
-      totalUsage: 45230,
-      totalInstalls: 12500,
-      averageRating: 4.7,
-      achievements: [
-        {
-          id: '1',
-          title: 'Early Adopter',
-          description: 'Joined in the first month',
-          icon: Trophy,
-          unlocked: true
-        },
-        {
-          id: '2',
-          title: 'Skill Creator',
-          description: 'Created your first skill',
-          icon: Code,
-          unlocked: true
-        },
-        {
-          id: '3',
-          title: 'Popular Creator',
-          description: 'Get 10,000+ installs',
-          icon: TrendingUp,
-          unlocked: true
-        },
-        {
-          id: '4',
-          title: 'Bounty Hunter',
-          description: 'Win a bounty challenge',
-          icon: Award,
-          unlocked: false,
-          progress: 75
-        },
-        {
-          id: '5',
-          title: 'Community Star',
-          description: 'Get 100+ reviews',
-          icon: Star,
-          unlocked: false,
-          progress: 45
-        }
-      ]
-    });
+    try {
+      // Fetch profile data from API
+      const response = await fetch('/api/me/profile');
 
-    // Mock created skills
-    setCreatedSkills([
-      {
-        id: '1',
-        name: 'Literature Review Assistant',
-        slug: 'literature-review',
-        shortDescription: 'Comprehensive literature review with citation management',
-        category: 'Academic',
-        stats: {
-          installs: 5230,
-          totalConversations: 12850,
-          rating: 4.9
-        },
-        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: '2',
-        name: 'Smart Flashcards',
-        slug: 'flashcards',
-        shortDescription: 'AI-powered flashcard generation',
-        category: 'Academic',
-        stats: {
-          installs: 3890,
-          totalConversations: 11500,
-          rating: 4.8
-        },
-        createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: '3',
-        name: 'Code Review Pro',
-        slug: 'code-review',
-        shortDescription: 'Automated code review assistant',
-        category: 'Programming',
-        stats: {
-          installs: 3210,
-          totalConversations: 9800,
-          rating: 4.7
-        },
-        createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+      if (response.ok) {
+        const data = await response.json();
+
+        // Map icon strings to actual components
+        const iconMap: { [key: string]: any } = {
+          'Trophy': Trophy,
+          'Sparkles': Sparkles,
+          'Zap': Zap,
+          'Code': Code,
+          'Star': Star,
+          'Users': Users,
+          'TrendingUp': TrendingUp,
+          'Award': Award,
+          'Play': Play,
+          'Activity': Activity,
+          'Flame': Flame,
+          'Package': Package,
+          'MessageSquare': MessageSquare,
+          'Heart': Heart
+        };
+
+        // Set user stats with proper icon mapping
+        setUserStats({
+          ...data.stats,
+          achievements: data.stats.achievements.map((achievement: any) => ({
+            ...achievement,
+            icon: iconMap[achievement.icon] || Trophy
+          }))
+        });
+
+        // Set created skills if available
+        if (data.createdSkills) {
+          setCreatedSkills(data.createdSkills);
+        }
+      } else {
+        // Use default mock data if API fails
+        console.log('Using mock data - API returned:', response.status);
+        setUserStats({
+          skillsCreated: 0,
+          skillsInstalled: 0,
+          totalUsage: 0,
+          totalInstalls: 0,
+          averageRating: 0,
+          followers: 0,
+          following: 0,
+          achievements: [
+            {
+              id: '1',
+              title: 'First Steps',
+              description: 'Install your first skill',
+              icon: Trophy,
+              unlocked: false,
+              progress: 0
+            },
+            {
+              id: '2',
+              title: 'Skill Explorer',
+              description: 'Install 3 skills',
+              icon: Sparkles,
+              unlocked: false,
+              progress: 0
+            }
+          ]
+        });
       }
-    ]);
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+      // Set default empty state on error
+      setUserStats({
+        skillsCreated: 0,
+        skillsInstalled: 0,
+        totalUsage: 0,
+        totalInstalls: 0,
+        averageRating: 0,
+        followers: 0,
+        following: 0,
+        achievements: []
+      });
+    }
 
-    // Mock installed skills
-    setInstalledSkills([
-      {
-        id: '4',
-        name: 'Data Analysis Wizard',
-        slug: 'data-analysis',
-        shortDescription: 'Statistical analysis from datasets',
-        category: 'Programming',
-        stats: {
-          installs: 2870,
-          totalConversations: 8900,
-          rating: 4.8
-        }
-      },
-      {
-        id: '5',
-        name: 'Mind Map Generator',
-        slug: 'mind-mapper',
-        shortDescription: 'Visual mind maps from content',
-        category: 'Academic',
-        stats: {
-          installs: 2560,
-          totalConversations: 7800,
-          rating: 4.6
+    // Fetch installed skills
+    try {
+      const installedResponse = await fetch('/api/me/installed');
+      if (installedResponse.ok) {
+        const installedData = await installedResponse.json();
+        if (installedData.installedSkills) {
+          setInstalledSkills(installedData.installedSkills.map((item: any) => item.skill));
         }
       }
-    ]);
+    } catch (error) {
+      console.error('Error fetching installed skills:', error);
+    }
 
     // Mock following list
     setFollowingList([
@@ -254,48 +231,9 @@ export default function ProfilePage() {
       }
     ]);
 
-    // Mock activity
-    setActivityItems([
-      {
-        id: '1',
-        type: 'created',
-        title: 'Created Literature Review Assistant',
-        description: 'New skill published to marketplace',
-        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        icon: Plus
-      },
-      {
-        id: '2',
-        type: 'installed',
-        title: 'Installed Data Analysis Wizard',
-        description: 'Added to your skills collection',
-        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        icon: Package
-      },
-      {
-        id: '3',
-        type: 'achievement',
-        title: 'Unlocked Popular Creator',
-        description: 'Reached 10,000+ total installs',
-        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        icon: Award
-      },
-      {
-        id: '4',
-        type: 'reviewed',
-        title: 'Reviewed Mind Map Generator',
-        description: 'Left a 5-star review',
-        timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-        icon: Star
-      }
-    ]);
+    // Activity removed as per user request
 
     setLoading(false);
-  };
-
-  const getActivityIcon = (item: ActivityItem) => {
-    const Icon = item.icon;
-    return <Icon className="h-4 w-4" />;
   };
 
   return (
@@ -325,7 +263,11 @@ export default function ProfilePage() {
               </Avatar>
               <div className="text-white">
                 <h1 className="text-3xl font-bold mb-1">{user?.name || 'User'}</h1>
-                <p className="text-white/90 mb-3">@{user?.email?.split('@')[0] || 'username'}</p>
+                <p className="text-white/90 mb-2">@{user?.email?.split('@')[0] || 'username'}</p>
+                <div className="flex items-center gap-4 text-white/90 mb-3">
+                  <span className="font-semibold">{userStats.followers || 0} <span className="font-normal">followers</span></span>
+                  <span className="font-semibold">{userStats.following || 0} <span className="font-normal">following</span></span>
+                </div>
                 <div className="flex items-center gap-4">
                   {isCreator && (
                     <Badge className="bg-white/20 text-white border-white/30 backdrop-blur">
@@ -381,7 +323,11 @@ export default function ProfilePage() {
                       <Activity className="h-4 w-4 text-orange-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{(userStats.totalUsage / 1000).toFixed(0)}k</p>
+                      <p className="text-2xl font-bold">
+                        {userStats.totalUsage >= 1000
+                          ? `${(userStats.totalUsage / 1000).toFixed(1)}k`
+                          : userStats.totalUsage}
+                      </p>
                       <p className="text-sm text-muted-foreground">Your Total Usage</p>
                     </div>
                   </div>
@@ -394,7 +340,7 @@ export default function ProfilePage() {
                       <Heart className="h-4 w-4 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">12</p>
+                      <p className="text-2xl font-bold">{favorites.length}</p>
                       <p className="text-sm text-muted-foreground">Favorite Skills</p>
                     </div>
                   </div>
@@ -478,41 +424,7 @@ export default function ProfilePage() {
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Recent Activity */}
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>Your latest actions and achievements</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {activityItems.map((item) => (
-                        <div key={item.id} className="flex items-start gap-3">
-                          <div className={cn(
-                            "p-2 rounded-lg",
-                            item.type === 'created' && "bg-purple-100",
-                            item.type === 'installed' && "bg-blue-100",
-                            item.type === 'achievement' && "bg-yellow-100",
-                            item.type === 'reviewed' && "bg-green-100"
-                          )}>
-                            {getActivityIcon(item)}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{item.title}</p>
-                            <p className="text-sm text-muted-foreground">{item.description}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {formatDistanceToNow(item.timestamp, { addSuffix: true })}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
+            <div className="grid grid-cols-1 gap-6">
               {/* Top Achievements */}
               <div>
                 <Card>
@@ -573,7 +485,7 @@ export default function ProfilePage() {
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {createdSkills.map((skill) => (
+                  {(createdSkills || []).map((skill) => (
                     <SkillCardNew
                       key={skill.id}
                       skill={skill}
@@ -615,7 +527,7 @@ export default function ProfilePage() {
             <div>
               <h2 className="text-xl font-semibold mb-6">Installed Skills</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {installedSkills.map((skill) => (
+                {(installedSkills || []).map((skill) => (
                   <SkillCardNew
                     key={skill.id}
                     skill={skill}

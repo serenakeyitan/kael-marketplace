@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { generateSlugFromFilename } from '@/lib/slug-utils';
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ import {
   Loader2,
   Sparkles,
   CheckCircle,
+  Github,
 } from 'lucide-react';
 
 interface AddNewSkillModalProps {
@@ -43,15 +45,20 @@ interface AddNewSkillModalProps {
 }
 
 const categories: SkillCategory[] = [
-  'Career',
-  'Health',
-  'Academic',
-  'Business',
-  'Programming',
-  'Marketing',
-  'Image',
-  'Prompt',
+  'productivity',
+  'creative',
+  'development',
+  'research',
+  'communication',
+  'education',
+  'entertainment',
+  'other',
 ];
+
+// Helper function to format category names for display
+const formatCategoryDisplay = (category: string) => {
+  return category.charAt(0).toUpperCase() + category.slice(1);
+};
 
 const mockBounties = [
   { id: '1', name: 'AI Research Assistant - $5000' },
@@ -74,6 +81,7 @@ export default function AddNewSkillModal({
   // Form state for upload dialog
   const [uploadedZip, setUploadedZip] = useState<File | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [githubUrl, setGithubUrl] = useState<string>('');
   const [isPublished, setIsPublished] = useState(true);
   const [participateInBounty, setParticipateInBounty] = useState(!!preSelectedBounty);
   const [selectedBounty, setSelectedBounty] = useState(preSelectedBounty || '');
@@ -122,16 +130,17 @@ export default function AddNewSkillModal({
       // Simulate skill creation from ZIP
       const skillData = {
         name: uploadedZip.name.replace('.zip', '') || 'New Skill',
-        slug: uploadedZip.name.replace('.zip', '').toLowerCase().replace(/\s+/g, '-') || 'new-skill',
+        slug: generateSlugFromFilename(uploadedZip.name) || 'new-skill',
         shortDescription: 'Uploaded skill from ZIP file',
         longDescription: 'This skill was uploaded from a ZIP file containing all necessary components.',
-        category: selectedCategory || 'Academic',
+        category: selectedCategory || 'education',
         audienceTags: ['All users'],
         demoPrompt: 'Try out this uploaded skill',
         examples: ['Example usage of the skill'],
         version: '1.0.0',
         bountyId: participateInBounty ? selectedBounty : undefined,
         status: isPublished ? 'published' : 'private',
+        githubUrl: githubUrl || undefined,
       };
 
       const response = await fetch('/api/skills', {
@@ -141,23 +150,55 @@ export default function AddNewSkillModal({
       });
 
       if (response.ok) {
+        const result = await response.json();
+
         // Signal that skills have been updated
         localStorage.setItem('skillsUpdated', 'true');
 
-        const successMessage = participateInBounty
-          ? 'Skill uploaded and entered into bounty competition!'
-          : 'Skill uploaded successfully!';
+        let successMessage = '';
+
+        // Check if slug was modified
+        if (result.slugModified) {
+          successMessage = participateInBounty
+            ? `Skill uploaded as "${result.finalSlug}" and entered into bounty! (name adjusted for uniqueness)`
+            : `Skill uploaded successfully as "${result.finalSlug}"! (name adjusted for uniqueness)`;
+        } else {
+          successMessage = participateInBounty
+            ? 'Skill uploaded and entered into bounty competition!'
+            : 'Skill uploaded successfully!';
+        }
 
         toast({
           title: 'Success!',
           description: successMessage,
+          duration: result.slugModified ? 6000 : 4000, // Show longer if slug was modified
         });
 
         resetForm();
         onOpenChange(false);
-        router.push('/my-skills?tab=uploaded');
+
+        // Navigate to the created skill page
+        if (result.skill?.slug) {
+          router.push(`/skills/${result.skill.slug}`);
+        } else {
+          router.push('/my-skills?tab=uploaded');
+        }
+      } else if (response.status === 409) {
+        const error = await response.json();
+        toast({
+          title: 'Name Conflict',
+          description: error.error || 'A skill with this name already exists. Please choose a different name.',
+          variant: 'destructive',
+        });
+      } else if (response.status === 401) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please sign in to create skills.',
+          variant: 'destructive',
+        });
       } else {
-        throw new Error('Failed to create skill');
+        const error = await response.json().catch(() => ({ error: 'Failed to create skill' }));
+        throw new Error(error.error || 'Failed to create skill');
       }
     } catch (error) {
       toast({
@@ -174,6 +215,7 @@ export default function AddNewSkillModal({
     setShowUploadDialog(false);
     setUploadedZip(null);
     setSelectedCategory('');
+    setGithubUrl('');
     setIsPublished(true);
     setParticipateInBounty(!!preSelectedBounty);
     setSelectedBounty(preSelectedBounty || '');
@@ -314,13 +356,34 @@ export default function AddNewSkillModal({
                 <SelectContent>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
-                      {category}
+                      {formatCategoryDisplay(category)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <p className="text-sm text-muted-foreground">
                 Help users discover your skill by selecting a relevant category
+              </p>
+            </div>
+
+            {/* GitHub URL */}
+            <div className="space-y-2">
+              <Label htmlFor="github-url" className="text-sm font-medium">
+                GitHub Repository (Optional)
+              </Label>
+              <div className="relative">
+                <Github className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="github-url"
+                  type="url"
+                  placeholder="https://github.com/username/repository"
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Link to your skill's source code repository
               </p>
             </div>
 

@@ -47,6 +47,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuthModal } from '@/hooks/use-auth-modal';
 import { cn } from '@/lib/utils';
 
 interface ReviewReply {
@@ -80,7 +81,8 @@ export default function SkillDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
   const [skill, setSkill] = useState<Skill | null>(null);
   const [relatedSkills, setRelatedSkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,6 +154,36 @@ export default function SkillDetailPage() {
       const data = await response.json();
       setSkill(data.skill);
       setRelatedSkills(data.relatedSkills || []);
+
+      // Track this as a recently viewed skill
+      if (data.skill) {
+        // Track in database (for authenticated users)
+        try {
+          await fetch('/api/recent-skills', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ skillId: data.skill.id })
+          });
+        } catch (error) {
+          console.error('Failed to track recent skill:', error);
+        }
+
+        // Also keep localStorage for backward compatibility and anonymous users
+        const recentSkills = JSON.parse(localStorage.getItem('recentSkills') || '[]');
+        const skillInfo = {
+          id: data.skill.id,
+          name: data.skill.name,
+          slug: data.skill.slug
+        };
+
+        // Remove if already exists, then add to beginning
+        const filtered = recentSkills.filter((s: any) => s.id !== data.skill.id);
+        const updated = [skillInfo, ...filtered].slice(0, 10); // Keep only last 10
+        localStorage.setItem('recentSkills', JSON.stringify(updated));
+
+        // Dispatch event to update sidebar
+        window.dispatchEvent(new Event('skillsUpdated'));
+      }
     } catch (error) {
       toast({
         title: 'Error',
@@ -317,6 +349,12 @@ export default function SkillDetailPage() {
   };
 
   const handleInstall = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to install this skill');
+      return;
+    }
+
     if (!skill) {
       toast({
         title: 'Error',
@@ -404,6 +442,12 @@ export default function SkillDetailPage() {
   };
 
   const handleLike = () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to like this skill');
+      return;
+    }
+
     if (!skill) return;
 
     const likedSkills = JSON.parse(localStorage.getItem('likedSkills') || '[]');
@@ -434,7 +478,16 @@ export default function SkillDetailPage() {
     localStorage.setItem('skillsUpdated', 'true');
   };
 
-  const handleUseInKael = () => {
+  const handleUseInKael = async () => {
+    // Track skill usage for achievements
+    try {
+      await fetch(`/api/skills/${params.slug}/use`, {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Failed to track skill usage:', error);
+    }
+
     toast({
       title: 'Opening in Kael',
       description: `Loading ${skill?.name} in Kael chat...`,
@@ -612,6 +665,12 @@ export default function SkillDetailPage() {
   };
 
   const handleSubmitReview = () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      openAuthModal('Sign in to post a review');
+      return;
+    }
+
     if (!reviewText.trim() || userRating === 0) {
       toast({
         title: 'Error',
@@ -672,21 +731,20 @@ export default function SkillDetailPage() {
     );
   }
 
-  // Calculate average rating
-  const averageRating = reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-    : skill.stats.rating || 0;
+  // Use rating from database (skill.stats contains the actual database values)
+  const averageRating = skill.stats.rating || 0;
+  const totalRatings = reviews.length;
 
   // Generate gradient based on skill category
   const gradientColors = {
-    'Career': 'from-amber-400 to-orange-600',
-    'Health': 'from-emerald-400 to-teal-600',
-    'Academic': 'from-indigo-400 to-purple-600',
-    'Business': 'from-rose-400 to-pink-600',
-    'Programming': 'from-blue-400 to-indigo-600',
-    'Marketing': 'from-fuchsia-400 to-pink-600',
-    'Image': 'from-violet-400 to-fuchsia-600',
-    'Prompt': 'from-cyan-400 to-sky-600',
+    'productivity': 'from-amber-400 to-orange-600',
+    'creative': 'from-purple-400 to-pink-600',
+    'development': 'from-blue-400 to-indigo-600',
+    'research': 'from-indigo-400 to-purple-600',
+    'communication': 'from-cyan-400 to-blue-600',
+    'education': 'from-emerald-400 to-teal-600',
+    'entertainment': 'from-green-400 to-emerald-600',
+    'other': 'from-gray-400 to-gray-600'
   };
   const gradient = gradientColors[skill.category as keyof typeof gradientColors] || 'from-blue-400 to-purple-600';
 
@@ -781,7 +839,7 @@ export default function SkillDetailPage() {
                 <div className="flex items-center gap-2">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="font-semibold">{averageRating.toFixed(1)}</span>
-                  <span className="text-sm text-white/70">({reviews.length} reviews)</span>
+                  <span className="text-sm text-white/70">({totalRatings} reviews)</span>
                 </div>
               </div>
             </div>
@@ -823,6 +881,19 @@ export default function SkillDetailPage() {
                   </>
                 )}
               </Button>
+              {skill.githubUrl && (
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                  asChild
+                >
+                  <a href={skill.githubUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="mr-2 h-5 w-5" />
+                    View on GitHub
+                  </a>
+                </Button>
+              )}
               <Button
                 size="lg"
                 variant="ghost"
@@ -937,7 +1008,7 @@ export default function SkillDetailPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Star className="h-5 w-5" />
-                    Reviews ({reviews.length})
+                    Reviews ({totalRatings})
                   </CardTitle>
                   <div className="text-2xl font-bold flex items-center gap-1">
                     {averageRating.toFixed(1)}
@@ -993,7 +1064,13 @@ export default function SkillDetailPage() {
                   <Button
                     className="w-full"
                     variant="outline"
-                    onClick={() => setShowReviewForm(true)}
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        openAuthModal('Sign in to write a review');
+                        return;
+                      }
+                      setShowReviewForm(true);
+                    }}
                   >
                     Post Review
                   </Button>
@@ -1070,7 +1147,12 @@ export default function SkillDetailPage() {
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">{review.userName}</span>
+                            <Link
+                              href={`/users/${review.userName.toLowerCase().replace(/\s+/g, '-')}`}
+                              className="font-medium text-sm hover:underline"
+                            >
+                              {review.userName}
+                            </Link>
                             {review.isRecommended && (
                               <Badge variant="secondary" className="text-xs">
                                 <ThumbsUp className="h-3 w-3 mr-1" />
@@ -1195,7 +1277,12 @@ export default function SkillDetailPage() {
                                     </Avatar>
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
-                                        <span className="font-medium text-xs">{reply.userName}</span>
+                                        <Link
+                                          href={`/users/${reply.userName.toLowerCase().replace(/\s+/g, '-')}`}
+                                          className="font-medium text-xs hover:underline"
+                                        >
+                                          {reply.userName}
+                                        </Link>
                                         <span className="text-xs text-muted-foreground">
                                           {formatDistanceToNow(reply.timestamp, { addSuffix: true })}
                                         </span>
