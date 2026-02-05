@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -47,23 +47,60 @@ export default function Sidebar({ className }: SidebarProps) {
   const { toast } = useToast();
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
-  // Mock recent and favorites data - connected to API
-  const [recentSkills] = useState([
-    { id: '1', name: 'Literature Review', slug: 'literature-review' },
-    { id: '2', name: 'Code Reviewer', slug: 'code-reviewer' },
-    { id: '3', name: 'Data Analysis', slug: 'data-analysis' }
-  ]);
+  // Real recent and favorites data
+  const [recentSkills, setRecentSkills] = useState<any[]>([]);
+  const [favoriteSkills, setFavoriteSkills] = useState<any[]>([]);
 
-  const [favoriteSkills] = useState([
-    { id: '1', name: 'Flashcards', slug: 'flashcards' },
-    { id: '2', name: 'Mind Mapper', slug: 'mind-mapper' },
-    { id: '3', name: 'Essay Assistant', slug: 'essay-assistant' },
-    { id: '4', name: 'Code Reviewer', slug: 'code-reviewer' },
-    { id: '5', name: 'Quiz Generator', slug: 'quiz-generator' },
-    { id: '6', name: 'Creative Writing', slug: 'creative-writing' },
-    { id: '7', name: 'Citation Checker', slug: 'citation-checker' },
-    { id: '8', name: 'Business Plan', slug: 'business-plan' }
-  ]);
+  // Load recent skills from localStorage and favorites
+  useEffect(() => {
+    const loadRecentSkills = () => {
+      const stored = localStorage.getItem('recentSkills');
+      if (stored) {
+        try {
+          const skills = JSON.parse(stored);
+          setRecentSkills(skills.slice(0, 3)); // Only show top 3
+        } catch (e) {
+          console.error('Error loading recent skills:', e);
+        }
+      }
+    };
+
+    const loadFavoriteSkills = async () => {
+      const likedSkillIds = JSON.parse(localStorage.getItem('likedSkills') || '[]');
+      if (likedSkillIds.length > 0) {
+        try {
+          // Fetch skill details for liked skills
+          const response = await fetch('/api/skills?limit=100');
+          if (response.ok) {
+            const data = await response.json();
+            const likedSkillsData = data.skills.filter((skill: any) =>
+              likedSkillIds.includes(skill.id)
+            );
+            setFavoriteSkills(likedSkillsData);
+          }
+        } catch (error) {
+          console.error('Error loading favorite skills:', error);
+        }
+      }
+    };
+
+    loadRecentSkills();
+    loadFavoriteSkills();
+
+    // Listen for storage changes
+    const handleStorageChange = () => {
+      loadRecentSkills();
+      loadFavoriteSkills();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('skillsUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('skillsUpdated', handleStorageChange);
+    };
+  }, []);
 
   const handleCreateClick = () => {
     setIsAddSkillModalOpen(true);
@@ -169,16 +206,20 @@ export default function Sidebar({ className }: SidebarProps) {
             Recent
           </h3>
           <div className="space-y-1">
-            {recentSkills.slice(0, 3).map((skill) => (
-              <Link
-                key={skill.id}
-                href={`/skills/${skill.slug}`}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                <Clock className="h-4 w-4 text-gray-400" />
-                <span className="truncate">{skill.name}</span>
-              </Link>
-            ))}
+            {recentSkills.length > 0 ? (
+              recentSkills.slice(0, 3).map((skill) => (
+                <Link
+                  key={skill.id}
+                  href={`/skills/${skill.slug}`}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <span className="truncate">{skill.name}</span>
+                </Link>
+              ))
+            ) : (
+              <p className="px-3 py-2 text-sm text-gray-400 italic">No recent skills</p>
+            )}
           </div>
         </div>
 
@@ -188,16 +229,20 @@ export default function Sidebar({ className }: SidebarProps) {
             Favorites
           </h3>
           <div className="max-h-48 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-            {favoriteSkills.map((skill) => (
-              <Link
-                key={skill.id}
-                href={`/skills/${skill.slug}`}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                <Heart className="h-4 w-4 text-red-400" />
-                <span className="truncate">{skill.name}</span>
-              </Link>
-            ))}
+            {favoriteSkills.length > 0 ? (
+              favoriteSkills.map((skill) => (
+                <Link
+                  key={skill.id}
+                  href={`/skills/${skill.slug}`}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <Heart className="h-4 w-4 text-red-400" />
+                  <span className="truncate">{skill.name}</span>
+                </Link>
+              ))
+            ) : (
+              <p className="px-3 py-2 text-sm text-gray-400 italic">No favorite skills</p>
+            )}
           </div>
         </div>
       </div>

@@ -154,6 +154,24 @@ export default function SkillDetailPage() {
       const data = await response.json();
       setSkill(data.skill);
       setRelatedSkills(data.relatedSkills || []);
+
+      // Track this as a recently viewed skill
+      if (data.skill) {
+        const recentSkills = JSON.parse(localStorage.getItem('recentSkills') || '[]');
+        const skillInfo = {
+          id: data.skill.id,
+          name: data.skill.name,
+          slug: data.skill.slug
+        };
+
+        // Remove if already exists, then add to beginning
+        const filtered = recentSkills.filter((s: any) => s.id !== data.skill.id);
+        const updated = [skillInfo, ...filtered].slice(0, 10); // Keep only last 10
+        localStorage.setItem('recentSkills', JSON.stringify(updated));
+
+        // Dispatch event to update sidebar
+        window.dispatchEvent(new Event('skillsUpdated'));
+      }
     } catch (error) {
       toast({
         title: 'Error',
